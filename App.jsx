@@ -1,111 +1,1064 @@
-:root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+import { useState } from "react";
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+const COLORS = {
+  cream: "#F0EDE6", dark: "#1C2B1E", lime: "#CDEA45",
+  card: "#E8E4DB", muted: "#8A9B8C", border: "#C8C4BB",
+};
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+// ─── SEASONAL VEG (NZ) ────────────────────────────────────────────────────────
+const SEASONS = ["Summer", "Autumn", "Winter", "Spring"];
+const SEASON_EMOJI = { Summer: "☀️", Autumn: "🍂", Winter: "❄️", Spring: "🌸" };
 
-  @media (max-width: 1024px) {
-    font-size: 16px;
+// Current NZ season (late March = Autumn)
+const CURRENT_SEASON = "Autumn";
+
+const VIBE_CHIPS     = ["Comfort Food", "Quick & Light", "Fakeaway", "Something Fresh", "Fancy It Up"];
+const TIME_CHIPS     = ["15 mins", "30 mins", "45 mins+"];
+const CUISINE_CHIPS  = ["Any", "Italian", "Asian", "Mexican", "Middle Eastern", "Indian", "Japanese", "French", "American", "Mediterranean"];
+const PROTEIN_CATEGORIES = {
+  Poultry:      ["Chicken breast", "Chicken thighs", "Chicken mince", "Turkey", "Duck"],
+  Seafood:      ["Salmon", "White fish", "Prawns", "Tuna (canned)", "Mussels", "Squid"],
+  "Red meat":   ["Beef mince", "Beef steak", "Lamb chops", "Lamb mince", "Pork belly", "Pork mince", "Sausages"],
+  "Plant-based":["Eggs", "Tofu", "Tempeh", "Chickpeas", "Lentils", "Kidney beans", "Halloumi"],
+};
+
+const CARB_CATEGORIES = {
+  Grains:       ["Pasta", "Rice", "Noodles", "Couscous", "Quinoa", "Polenta"],
+  Bread:        ["Sourdough", "Flatbread", "Tortillas", "Pita", "Bao buns"],
+  "Root veg":   ["Kumara", "Potatoes", "Parsnip", "Cassava"],
+  Other:        ["No carbs"],
+};
+
+const SEASONAL_VEG_CATEGORIES = {
+  Summer: {
+    Fruiting:   ["Courgette", "Capsicum", "Tomatoes", "Corn", "Cucumber", "Eggplant"],
+    Legumes:    ["Beans", "Peas", "Broad beans"],
+    Leafy:      ["Spinach", "Lettuce", "Silverbeet"],
+  },
+  Autumn: {
+    "Root & squash": ["Pumpkin", "Kumara", "Carrot", "Beetroot"],
+    Brassica:        ["Broccoli", "Cauliflower", "Cabbage"],
+    Leafy:           ["Silverbeet", "Spinach", "Kale"],
+    Other:           ["Leek", "Mushrooms", "Capsicum", "Feijoa"],
+  },
+  Winter: {
+    "Root & squash": ["Kumara", "Pumpkin", "Parsnip", "Carrot", "Beetroot"],
+    Brassica:        ["Cauliflower", "Cabbage", "Kale", "Brussels sprouts", "Broccoli"],
+    Allium:          ["Leek", "Onion", "Spring onion"],
+    Leafy:           ["Silverbeet", "Kale", "Spinach"],
+  },
+  Spring: {
+    Asparagus:  ["Asparagus"],
+    Legumes:    ["Peas", "Broad beans", "Beans"],
+    Leafy:      ["Spinach", "Lettuce", "Silverbeet"],
+    Other:      ["Radish", "Spring onion", "Courgette", "Broccoli"],
+  },
+};
+
+const PANTRY_STAPLES = ["Olive oil", "Garlic", "Salt & pepper", "Onion", "Soy sauce", "Butter", "Lemon"];
+
+// ─── MOCK DATA ────────────────────────────────────────────────────────────────
+const MOCK_MEALS = [
+  {
+    id: 1, name: "Spaghetti Carbonara", emoji: "🍝",
+    time: "25 mins", difficulty: "Easy", calories: 520,
+    ingredients: ["200g spaghetti", "100g pancetta", "2 large eggs + 1 yolk", "50g pecorino"],
+    pantryUsed: ["Garlic", "Salt & pepper", "Olive oil"],
+    macros: { protein: 28, carbs: 42, fat: 30 },
+    method: ["Boil spaghetti in salted water until al dente. Reserve a mug of pasta water.", "Fry pancetta until crispy. Add garlic for the last minute, remove from heat.", "Whisk eggs, yolk, and most of the cheese. Season generously with black pepper.", "Toss hot pasta with pancetta off the heat. Add egg mix and toss fast with pasta water until silky.", "Serve with remaining cheese and a crack of pepper."],
+  },
+  {
+    id: 2, name: "Chicken Stir Fry", emoji: "🥢",
+    time: "20 mins", difficulty: "Easy", calories: 410,
+    ingredients: ["2 chicken breasts, sliced", "Broccoli & capsicum", "Rice to serve"],
+    pantryUsed: ["Soy sauce", "Garlic", "Olive oil", "Salt & pepper"],
+    macros: { protein: 38, carbs: 35, fat: 27 },
+    method: ["Mix soy sauce, garlic and a splash of sesame oil in a bowl.", "Heat a wok until very hot. Cook chicken in batches until golden.", "Add broccoli, stir fry 3 mins. Add capsicum and toss.", "Pour over sauce, cook 1–2 mins until coated and glossy.", "Serve over rice."],
+  },
+  {
+    id: 3, name: "Halloumi Wraps", emoji: "🫓",
+    time: "15 mins", difficulty: "Easy", calories: 480,
+    ingredients: ["250g halloumi, sliced", "4 flour tortillas", "1 avocado", "Cherry tomatoes", "Mixed leaves"],
+    pantryUsed: ["Olive oil", "Lemon", "Salt & pepper"],
+    macros: { protein: 22, carbs: 38, fat: 40 },
+    method: ["Slice halloumi into 1cm planks. Heat a dry griddle until hot.", "Cook halloumi 2 mins each side until golden.", "Warm tortillas in a dry pan or microwave.", "Mash avocado with lemon and salt. Spread over each wrap.", "Layer leaves, tomatoes, halloumi. Fold and serve."],
+  },
+];
+
+// ─── PROMPT BUILDER ───────────────────────────────────────────────────────────
+function buildPrompt(prefs) {
+  const proteins = prefs.proteins.includes("Any") ? "any protein" : prefs.proteins.join(", ");
+  const carbs    = prefs.carbs.includes("Any") ? "any carbs" : prefs.carbs.join(", ");
+  const veg      = prefs.veg.includes("Any") ? `any seasonal NZ ${prefs.season} vegetables` : prefs.veg.join(", ");
+  const cuisineNote = prefs.cuisine && prefs.cuisine !== "Any" ? `- Cuisine style: ${prefs.cuisine} — all 3 meals must be ${prefs.cuisine} in style` : "";
+  const macroNote = prefs.macros
+    ? `- Macro target: aim for roughly ${prefs.macros.protein}% protein, ${prefs.macros.carbs}% carbs, ${prefs.macros.fat}% fat per serving`
+    : "";
+
+  return `You are a meal planning assistant for New Zealand home cooks. It is ${prefs.season} in NZ.
+
+The user wants dinner tonight:
+- Protein: ${proteins}
+- Carbs: ${carbs}
+- Vegetables: ${veg}
+- Target calories per serving: around ${prefs.calories} kcal
+- Servings: ${prefs.people}
+- Season: ${prefs.season} in New Zealand — reflect this in the meal style and ingredients
+${cuisineNote}
+${macroNote}
+
+Assume the user has these pantry staples available: olive oil, garlic, salt, pepper, onion, soy sauce, butter, lemon.
+
+Generate exactly 3 different weeknight dinner ideas.
+
+Respond ONLY with a valid JSON array. No explanation, no markdown, no preamble:
+[
+  {
+    "name": "Meal name",
+    "emoji": "single relevant emoji",
+    "time": "X mins",
+    "difficulty": "Easy",
+    "calories": 500,
+    "ingredients": ["quantity + ingredient (hero ingredients only, not pantry staples)"],
+    "pantryUsed": ["Garlic", "Olive oil"],
+    "macros": { "protein": 30, "carbs": 40, "fat": 30 },
+    "method": ["Step one.", "Step two.", "Step three.", "Step four.", "Step five."]
   }
+]
+
+Rules:
+- ingredients: 4–6 hero items only, scaled to ${prefs.people} serving(s). Do NOT include pantry staples here.
+- pantryUsed: list which pantry staples this recipe uses from: olive oil, garlic, salt & pepper, onion, soy sauce, butter, lemon
+- method: 4–5 steps, written assuming pantry staples are available
+- Make all 3 meals distinct in style`;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
+// ─── SHARED COMPONENTS ────────────────────────────────────────────────────────
+function Chip({ label, selected, onClick, accent, dim }) {
+  return (
+    <button onClick={onClick} style={{
+      padding: "8px 16px", borderRadius: "100px", flexShrink: 0,
+      border: `1.5px solid ${selected ? "transparent" : COLORS.border}`,
+      background: selected ? (accent ? COLORS.lime : COLORS.dark) : "transparent",
+      color: selected ? (accent ? COLORS.dark : COLORS.cream) : dim ? COLORS.muted : COLORS.dark,
+      fontSize: "13px", fontFamily: "'DM Sans', sans-serif",
+      fontWeight: selected ? "600" : "400", cursor: "pointer",
+      whiteSpace: "nowrap", transition: "all 0.15s ease", opacity: dim ? 0.6 : 1,
+    }}>
+      {label}
+    </button>
+  );
 }
 
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
+function Stepper({ value, onChange }) {
+  const btn = (label, action) => (
+    <button onClick={action} style={{
+      width: 36, height: 36, borderRadius: "50%", border: `1.5px solid ${COLORS.border}`,
+      background: "transparent", fontSize: "18px", cursor: "pointer",
+      display: "flex", alignItems: "center", justifyContent: "center", color: COLORS.dark,
+    }}>{label}</button>
+  );
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+      {btn("−", () => onChange(Math.max(1, value - 1)))}
+      <span style={{ fontSize: "18px", fontWeight: "600", minWidth: "20px", textAlign: "center", color: COLORS.dark }}>{value}</span>
+      {btn("+", () => onChange(Math.min(8, value + 1)))}
+    </div>
+  );
 }
 
-body {
-  margin: 0;
+// ─── PROGRESSIVE DISCLOSURE SELECTOR ────────────────────────────────────────
+function ProgressiveDisclosureSelector({ icon, label, sublabel, categories, selected, onChange }) {
+  const [activeCategory, setActiveCategory] = useState(null);
+  const [inputVal, setInputVal]             = useState("");
+  const selectedItems = selected.filter(s => s !== "Any");
+
+  const toggleCategory = (cat) => {
+    setActiveCategory(prev => prev === cat ? null : cat);
+    setInputVal("");
+  };
+
+  const toggleChip = (chip) => {
+    const next = selectedItems.includes(chip)
+      ? selectedItems.filter(s => s !== chip)
+      : [...selectedItems, chip];
+    onChange(next.length === 0 ? ["Any"] : next);
+  };
+
+  const confirmCustom = () => {
+    const val = inputVal.trim();
+    if (!val) return;
+    onChange([...selectedItems, val]);
+    setInputVal("");
+  };
+
+  const countInCategory = (cat) =>
+    categories[cat].filter(c => selectedItems.includes(c)).length;
+
+  return (
+    <div>
+      {/* Section header */}
+      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: "12px" }}>
+        <div style={{ display: "flex", alignItems: "baseline", gap: "8px" }}>
+          <label style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "0.1em", color: COLORS.muted, textTransform: "uppercase", fontFamily: "'DM Sans', sans-serif" }}>
+            {icon} {label}
+          </label>
+          {sublabel && <span style={{ fontSize: "11px", color: COLORS.muted, fontFamily: "'DM Sans', sans-serif", fontStyle: "italic" }}>{sublabel}</span>}
+        </div>
+        {selectedItems.length > 0 && (
+          <button onClick={() => { onChange(["Any"]); setActiveCategory(null); }}
+            style={{ background: "none", border: "none", cursor: "pointer", fontSize: "11px", color: COLORS.muted, fontFamily: "'DM Sans', sans-serif", textDecoration: "underline" }}>
+            Clear
+          </button>
+        )}
+      </div>
+
+      {/* Step 1 — Category pills */}
+      <div style={{ display: "flex", gap: "8px", overflowX: "auto", paddingBottom: "4px" }}>
+        {Object.keys(categories).map(cat => {
+          const count     = countInCategory(cat);
+          const isActive  = activeCategory === cat;
+          return (
+            <button key={cat} onClick={() => toggleCategory(cat)} style={{
+              padding: "8px 14px", borderRadius: "100px", flexShrink: 0,
+              border: `1.5px solid ${isActive || count > 0 ? COLORS.dark : COLORS.border}`,
+              background: isActive ? COLORS.dark : count > 0 ? COLORS.card : "transparent",
+              color: isActive ? COLORS.cream : COLORS.dark,
+              fontSize: "13px", fontFamily: "'DM Sans', sans-serif",
+              fontWeight: isActive || count > 0 ? "600" : "400",
+              cursor: "pointer", whiteSpace: "nowrap",
+              transition: "all 0.15s ease",
+              display: "flex", alignItems: "center", gap: "6px",
+            }}>
+              {cat}
+              {count > 0 && (
+                <span style={{
+                  background: isActive ? COLORS.lime : COLORS.dark,
+                  color: isActive ? COLORS.dark : COLORS.cream,
+                  borderRadius: "100px", padding: "0px 6px",
+                  fontSize: "11px", fontWeight: "700", fontFamily: "'DM Sans', sans-serif",
+                }}>
+                  {count}
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Step 2 — Specific chips for active category */}
+      {activeCategory && (
+        <div style={{ marginTop: "12px", padding: "16px", background: COLORS.card, borderRadius: "16px" }}>
+          <div style={{ fontSize: "10px", fontWeight: "700", letterSpacing: "0.1em", color: COLORS.muted, textTransform: "uppercase", fontFamily: "'DM Sans', sans-serif", marginBottom: "12px" }}>
+            {activeCategory}
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+            {categories[activeCategory].map(chip => {
+              const isSelected = selectedItems.includes(chip);
+              return (
+                <button key={chip} onClick={() => toggleChip(chip)} style={{
+                  padding: "8px 14px", borderRadius: "100px",
+                  border: `1.5px solid ${isSelected ? "transparent" : COLORS.border}`,
+                  background: isSelected ? COLORS.dark : COLORS.cream,
+                  color: isSelected ? COLORS.cream : COLORS.dark,
+                  fontSize: "13px", fontFamily: "'DM Sans', sans-serif",
+                  fontWeight: isSelected ? "600" : "400",
+                  cursor: "pointer", transition: "all 0.12s ease",
+                }}>
+                  {chip}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Open text fallback at bottom of expanded category */}
+          <div style={{ display: "flex", gap: "8px", alignItems: "center", marginTop: "12px", paddingTop: "12px", borderTop: `1px solid ${COLORS.border}` }}>
+            <input
+              value={inputVal}
+              onChange={e => setInputVal(e.target.value)}
+              onKeyDown={e => { if (e.key === "Enter") confirmCustom(); }}
+              placeholder={`Other ${activeCategory.toLowerCase()}...`}
+              style={{
+                flex: 1, padding: "8px 14px", borderRadius: "100px",
+                border: `1.5px solid ${COLORS.border}`, background: COLORS.cream,
+                fontSize: "13px", fontFamily: "'DM Sans', sans-serif",
+                color: COLORS.dark, outline: "none",
+              }}
+            />
+            {inputVal.trim() && (
+              <button onClick={confirmCustom} style={{
+                width: 32, height: 32, borderRadius: "50%", background: COLORS.dark,
+                border: "none", color: COLORS.lime, fontSize: "15px", cursor: "pointer", flexShrink: 0,
+              }}>✓</button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Selected items summary */}
+      {selectedItems.length > 0 && (
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginTop: "10px" }}>
+          {selectedItems.map(item => (
+            <button key={item} onClick={() => toggleChip(item)} style={{
+              padding: "5px 11px", borderRadius: "100px",
+              border: "none", background: COLORS.dark,
+              color: COLORS.cream, fontSize: "12px", fontFamily: "'DM Sans', sans-serif",
+              fontWeight: "600", cursor: "pointer",
+              display: "flex", alignItems: "center", gap: "5px",
+            }}>
+              {item} <span style={{ opacity: 0.5, fontSize: "10px" }}>✕</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
+function CalorieSlider({ value, onChange }) {
+  const min = 200, max = 900;
+  const pct = ((value - min) / (max - min)) * 100;
+  const label = value <= 350 ? "Light" : value <= 550 ? "Medium" : value <= 750 ? "Hearty" : "Feast";
+  const labelColor = value <= 350 ? "#6BAE8A" : value <= 550 ? COLORS.dark : value <= 750 ? "#C47B2B" : "#B94040";
+
+  const step = (dir) => {
+    const next = value + dir * 25;
+    onChange(Math.min(max, Math.max(min, next)));
+  };
+
+  const stepBtn = (dir, symbol) => (
+    <button onClick={() => step(dir)} style={{
+      width: 32, height: 32, borderRadius: "50%", flexShrink: 0,
+      border: `1.5px solid ${COLORS.border}`, background: "transparent",
+      fontSize: "16px", cursor: "pointer", color: COLORS.dark,
+      display: "flex", alignItems: "center", justifyContent: "center",
+      fontFamily: "'DM Sans', sans-serif", fontWeight: "500",
+    }}>{symbol}</button>
+  );
+
+  return (
+    <div>
+      {/* Value + label row */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "14px" }}>
+        <div>
+          <span style={{ fontSize: "32px", fontWeight: "700", color: COLORS.dark, fontFamily: "'DM Sans', sans-serif", lineHeight: 1 }}>{value}</span>
+          <span style={{ fontSize: "14px", color: COLORS.muted, fontFamily: "'DM Sans', sans-serif", marginLeft: "4px" }}>kcal</span>
+        </div>
+        <span style={{ fontSize: "13px", fontWeight: "700", color: labelColor, fontFamily: "'DM Sans', sans-serif" }}>{label}</span>
+      </div>
+
+      {/* Slider track */}
+      <div style={{ position: "relative", height: "4px", borderRadius: "4px", background: COLORS.border, marginBottom: "12px" }}>
+        <div style={{ position: "absolute", left: 0, top: 0, height: "100%", width: `${pct}%`, background: COLORS.dark, borderRadius: "4px" }} />
+        <input type="range" min={min} max={max} step={25} value={value} onChange={e => onChange(Number(e.target.value))}
+          style={{ position: "absolute", top: "50%", left: 0, transform: "translateY(-50%)", width: "100%", opacity: 0, cursor: "pointer", height: "28px", margin: 0 }} />
+        <div style={{ position: "absolute", top: "50%", left: `${pct}%`, transform: "translate(-50%, -50%)", width: "22px", height: "22px", borderRadius: "50%", background: COLORS.dark, border: `3px solid ${COLORS.cream}`, boxShadow: "0 1px 4px rgba(0,0,0,0.2)", pointerEvents: "none" }} />
+      </div>
+
+      {/* Stepper row */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <span style={{ fontSize: "11px", color: COLORS.muted, fontFamily: "'DM Sans', sans-serif" }}>200 kcal</span>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2px" }}>
+            <button onClick={() => step(-1)} style={{
+              width: 32, height: 32, borderRadius: "50%", flexShrink: 0,
+              border: `1.5px solid ${COLORS.border}`, background: "transparent",
+              fontSize: "18px", cursor: "pointer", color: COLORS.dark,
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>−</button>
+            <span style={{ fontSize: "9px", color: COLORS.muted, fontFamily: "'DM Sans', sans-serif" }}>25 kcal</span>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2px" }}>
+            <button onClick={() => step(+1)} style={{
+              width: 32, height: 32, borderRadius: "50%", flexShrink: 0,
+              border: `1.5px solid ${COLORS.border}`, background: "transparent",
+              fontSize: "18px", cursor: "pointer", color: COLORS.dark,
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>+</button>
+            <span style={{ fontSize: "9px", color: COLORS.muted, fontFamily: "'DM Sans', sans-serif" }}>25 kcal</span>
+          </div>
+        </div>
+        <span style={{ fontSize: "11px", color: COLORS.muted, fontFamily: "'DM Sans', sans-serif" }}>900 kcal</span>
+      </div>
+    </div>
+  );
 }
 
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
-  margin: 0;
+// ─── MACRO BAR (shared across screens) ───────────────────────────────────────
+// Pass calories prop to show grams; omit for percentage display
+function MacroBar({ protein, carbs, fat, size = "sm", calories }) {
+  const h         = size === "lg" ? "6px" : "4px";
+  const fontSize  = size === "lg" ? "12px" : "11px";
+  const showGrams = !!calories;
+
+  const toG = (pct, kcalPerG) => Math.round((pct / 100) * calories / kcalPerG);
+  const labels = showGrams
+    ? [["Protein", toG(protein, 4), "g", "#7BB8F0"], ["Carbs", toG(carbs, 4), "g", COLORS.lime], ["Fat", toG(fat, 9), "g", "#F0A87B"]]
+    : [["P", protein, "%", "#7BB8F0"], ["C", carbs, "%", COLORS.lime], ["F", fat, "%", "#F0A87B"]];
+
+  return (
+    <div>
+      <div style={{ display: "flex", height: h, borderRadius: "4px", overflow: "hidden", gap: "1px" }}>
+        <div style={{ width: `${protein}%`, background: "#7BB8F0" }} />
+        <div style={{ width: `${carbs}%`,   background: COLORS.lime }} />
+        <div style={{ width: `${fat}%`,     background: "#F0A87B" }} />
+      </div>
+      <div style={{ display: "flex", gap: showGrams ? "16px" : "12px", marginTop: "6px" }}>
+        {labels.map(([l, v, unit, c]) => (
+          <div key={l} style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+            <div style={{ width: 7, height: 7, borderRadius: "50%", background: c, flexShrink: 0 }} />
+            <span style={{ fontSize, color: COLORS.muted, fontFamily: "'DM Sans', sans-serif" }}>
+              {l} <strong style={{ color: COLORS.dark }}>{v}{unit}</strong>
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
+// ─── MACRO PRESETS ────────────────────────────────────────────────────────────
+const MACRO_PRESETS = [
+  { name: "Balanced",     protein: 30, carbs: 40, fat: 30 },
+  { name: "High Protein", protein: 45, carbs: 30, fat: 25 },
+  { name: "Low Carb",     protein: 35, carbs: 20, fat: 45 },
+  { name: "Keto",         protein: 25, carbs: 5,  fat: 70 },
+  { name: "High Carb",    protein: 20, carbs: 55, fat: 25 },
+  { name: "Low Fat",      protein: 40, carbs: 45, fat: 15 },
+];
+
+// ─── MACRO SELECTOR (always on, pills + steppers) ─────────────────────────────
+const DEFAULT_MACROS = { protein: 30, carbs: 40, fat: 30 };
+
+function MacroSelector({ value, onChange }) {
+  const macros = value || DEFAULT_MACROS;
+
+  const adjust = (key, dir) => {
+    const delta  = dir * 5;
+    const newVal = Math.min(90, Math.max(5, macros[key] + delta));
+    const diff   = newVal - macros[key];
+    if (diff === 0) return;
+
+    const others     = Object.keys(macros).filter(k => k !== key);
+    const otherTotal = others.reduce((s, k) => s + macros[k], 0);
+    let updated      = { ...macros, [key]: newVal };
+
+    if (otherTotal > 0) {
+      others.forEach(k => {
+        updated[k] = Math.max(5, Math.round(macros[k] - diff * (macros[k] / otherTotal)));
+      });
+    }
+
+    const total  = Object.values(updated).reduce((s, v) => s + v, 0);
+    const delta2 = 100 - total;
+    if (delta2 !== 0) {
+      const fixKey = others.find(k => updated[k] + delta2 >= 5) || others[0];
+      updated[fixKey] = Math.max(5, updated[fixKey] + delta2);
+    }
+
+    onChange(updated);
+  };
+
+  const MacroStepper = ({ label, k, color }) => (
+    <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: "6px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+        <div style={{ width: 8, height: 8, borderRadius: "50%", background: color, flexShrink: 0 }} />
+        <span style={{ fontSize: "11px", fontWeight: "700", color: COLORS.muted, textTransform: "uppercase", letterSpacing: "0.08em", fontFamily: "'DM Sans', sans-serif" }}>{label}</span>
+      </div>
+      <span style={{ fontSize: "22px", fontWeight: "700", color: COLORS.dark, fontFamily: "'DM Sans', sans-serif", lineHeight: 1 }}>
+        {macros[k]}%
+      </span>
+      <div style={{ display: "flex", gap: "6px" }}>
+        <button onClick={() => adjust(k, -1)} style={{ width: 28, height: 28, borderRadius: "50%", border: `1.5px solid ${COLORS.border}`, background: "transparent", fontSize: "16px", cursor: "pointer", color: COLORS.dark, display: "flex", alignItems: "center", justifyContent: "center" }}>−</button>
+        <button onClick={() => adjust(k, +1)} style={{ width: 28, height: 28, borderRadius: "50%", border: `1.5px solid ${COLORS.border}`, background: "transparent", fontSize: "16px", cursor: "pointer", color: COLORS.dark, display: "flex", alignItems: "center", justifyContent: "center" }}>+</button>
+      </div>
+    </div>
+  );
+
+  return (
+    <div>
+      <label style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "0.1em", color: COLORS.muted, textTransform: "uppercase", display: "block", marginBottom: "12px", fontFamily: "'DM Sans', sans-serif" }}>
+        ⚖️ Macro ratio
+      </label>
+
+      {/* Preset pills */}
+      <div style={{ display: "flex", gap: "8px", overflowX: "auto", paddingBottom: "10px" }}>
+        {MACRO_PRESETS.map(p => {
+          const isMatch = macros.protein === p.protein && macros.carbs === p.carbs && macros.fat === p.fat;
+          return (
+            <button key={p.name} onClick={() => onChange({ protein: p.protein, carbs: p.carbs, fat: p.fat })}
+              style={{
+                padding: "7px 14px", borderRadius: "100px", flexShrink: 0,
+                border: `1.5px solid ${isMatch ? COLORS.dark : COLORS.border}`,
+                background: isMatch ? COLORS.dark : "transparent",
+                color: isMatch ? COLORS.cream : COLORS.dark,
+                fontSize: "13px", fontFamily: "'DM Sans', sans-serif",
+                fontWeight: isMatch ? "600" : "400", cursor: "pointer",
+                whiteSpace: "nowrap", transition: "all 0.15s ease",
+              }}>
+              {p.name}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Steppers + live bar */}
+      <div style={{ background: COLORS.card, borderRadius: "16px", padding: "16px" }}>
+        <div style={{ display: "flex", gap: "8px", marginBottom: "16px" }}>
+          <MacroStepper label="Protein" k="protein" color="#7BB8F0" />
+          <div style={{ width: "1px", background: COLORS.border, flexShrink: 0 }} />
+          <MacroStepper label="Carbs" k="carbs" color={COLORS.lime} />
+          <div style={{ width: "1px", background: COLORS.border, flexShrink: 0 }} />
+          <MacroStepper label="Fat" k="fat" color="#F0A87B" />
+        </div>
+        <MacroBar protein={macros.protein} carbs={macros.carbs} fat={macros.fat} />
+      </div>
+    </div>
+  );
 }
 
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+// ─── SCREEN 1: INPUT ──────────────────────────────────────────────────────────
+function InputScreen({ onGenerate, isLoading }) {
+  const [season, setSeason]     = useState(CURRENT_SEASON);
+  const [proteins, setProteins] = useState(["Any"]);
+  const [carbs, setCarbs]       = useState(["Any"]);
+  const [veg, setVeg]           = useState(["Any"]);
+  const [calories, setCalories] = useState(500);
+  const [macros, setMacros]     = useState(DEFAULT_MACROS);
+  const [people, setPeople]     = useState(2);
+
+  // Reset veg selection when season changes
+  const handleSeasonChange = (s) => {
+    setSeason(s);
+    setVeg(["Any"]);
+  };
+
+  const summary = () => {
+    const parts = [];
+    if (!proteins.includes("Any")) parts.push(proteins.join(", "));
+    if (!carbs.includes("Any"))    parts.push(carbs.join(", "));
+    if (!veg.includes("Any"))      parts.push(veg.join(", "));
+    return parts.length ? parts.join(" · ") : null;
+  };
+
+  return (
+    <div style={{ padding: "0 0 110px 0" }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600;700&display=swap');
+        @keyframes spin { from{transform:rotate(0deg)}to{transform:rotate(360deg)} }
+        * { box-sizing: border-box; }
+        ::-webkit-scrollbar { display: none; }
+        input:focus { outline: none; }
+      `}</style>
+
+      {/* Header */}
+      <div style={{ padding: "56px 24px 24px" }}>
+        <div style={{ display: "inline-flex", alignItems: "center", background: COLORS.lime, borderRadius: "100px", padding: "6px 14px", marginBottom: "18px" }}>
+          <span style={{ fontSize: "13px", fontWeight: "600", color: COLORS.dark, fontFamily: "'DM Sans', sans-serif" }}>✦ AI Powered · NZ Seasonal</span>
+        </div>
+        <h1 style={{ fontSize: "36px", lineHeight: "1.1", color: COLORS.dark, fontFamily: "'DM Serif Display', Georgia, serif", fontWeight: "400", margin: 0 }}>
+          What's for<br />dinner tonight?
+        </h1>
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: "28px" }}>
+
+        {/* Season selector */}
+        <div style={{ padding: "0 24px" }}>
+          <div style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "0.12em", color: COLORS.dark, textTransform: "uppercase", fontFamily: "'DM Sans', sans-serif", borderTop: `1px solid ${COLORS.border}`, paddingTop: "20px", marginBottom: "16px" }}>
+            🗓 Season
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: "8px" }}>
+            {SEASONS.map(s => (
+              <button key={s} onClick={() => handleSeasonChange(s)} style={{
+                padding: "12px 4px", borderRadius: "16px", border: `1.5px solid ${season === s ? "transparent" : COLORS.border}`,
+                background: season === s ? COLORS.dark : "transparent",
+                color: season === s ? COLORS.cream : COLORS.dark,
+                fontSize: "12px", fontFamily: "'DM Sans', sans-serif",
+                fontWeight: season === s ? "700" : "400", cursor: "pointer",
+                display: "flex", flexDirection: "column", alignItems: "center", gap: "4px",
+                transition: "all 0.15s ease",
+              }}>
+                <span style={{ fontSize: "20px" }}>{SEASON_EMOJI[s]}</span>
+                <span>{s}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Ingredients */}
+        <div style={{ padding: "0 24px" }}>
+          <div style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "0.12em", color: COLORS.dark, textTransform: "uppercase", fontFamily: "'DM Sans', sans-serif", borderTop: `1px solid ${COLORS.border}`, paddingTop: "20px", marginBottom: "24px" }}>
+            What's in the fridge?
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "28px" }}>
+            <ProgressiveDisclosureSelector
+              icon="🥩" label="Protein" sublabel="pick a category first"
+              categories={PROTEIN_CATEGORIES}
+              selected={proteins} onChange={setProteins}
+            />
+            <ProgressiveDisclosureSelector
+              icon="🌾" label="Carbs" sublabel="pick a category first"
+              categories={CARB_CATEGORIES}
+              selected={carbs} onChange={setCarbs}
+            />
+            <ProgressiveDisclosureSelector
+              icon="🥦" label="Vegetables" sublabel={`${season} in NZ`}
+              categories={SEASONAL_VEG_CATEGORIES[season]}
+              selected={veg} onChange={setVeg}
+            />
+          </div>
+        </div>
+
+        {/* Pantry staples note */}
+        <div style={{ padding: "0 24px" }}>
+          <div style={{ background: COLORS.card, borderRadius: "14px", padding: "12px 16px", display: "flex", gap: "10px", alignItems: "flex-start" }}>
+            <span style={{ fontSize: "16px", flexShrink: 0 }}>🧂</span>
+            <div>
+              <div style={{ fontSize: "12px", fontWeight: "700", color: COLORS.dark, fontFamily: "'DM Sans', sans-serif", marginBottom: "2px" }}>Pantry staples assumed</div>
+              <div style={{ fontSize: "12px", color: COLORS.muted, fontFamily: "'DM Sans', sans-serif", lineHeight: 1.5 }}>
+                Recipes will use: {PANTRY_STAPLES.join(", ")}. You can remove any from the recipe if you don't have it.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Selection summary */}
+        {summary() && (
+          <div style={{ padding: "0 24px" }}>
+            <div style={{ background: COLORS.dark, borderRadius: "16px", padding: "12px 16px", display: "flex", gap: "10px", alignItems: "center" }}>
+              <span style={{ fontSize: "13px", color: COLORS.lime, fontWeight: "600", fontFamily: "'DM Sans', sans-serif" }}>✦</span>
+              <span style={{ fontSize: "13px", color: COLORS.cream, fontFamily: "'DM Sans', sans-serif", lineHeight: 1.4 }}>{summary()}</span>
+            </div>
+          </div>
+        )}
+
+        {/* Tonight's details */}
+        <div style={{ padding: "0 24px" }}>
+          <div style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "0.12em", color: COLORS.dark, textTransform: "uppercase", fontFamily: "'DM Sans', sans-serif", borderTop: `1px solid ${COLORS.border}`, paddingTop: "20px", marginBottom: "24px" }}>
+            Tonight's details
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "28px" }}>
+            <div>
+              <label style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "0.1em", color: COLORS.muted, textTransform: "uppercase", display: "block", marginBottom: "14px", fontFamily: "'DM Sans', sans-serif" }}>
+                👤 Servings
+              </label>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <Stepper value={people} onChange={setPeople} />
+                <span style={{ fontSize: "13px", color: COLORS.muted, fontFamily: "'DM Sans', sans-serif" }}>
+                  ~{(calories * people).toLocaleString()} kcal total
+                </span>
+              </div>
+            </div>
+            <div>
+              <label style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "0.1em", color: COLORS.muted, textTransform: "uppercase", display: "block", marginBottom: "14px", fontFamily: "'DM Sans', sans-serif" }}>
+                🔥 Calories per serving
+              </label>
+              <CalorieSlider value={calories} onChange={setCalories} />
+            </div>
+            <MacroSelector value={macros} onChange={setMacros} />
+          </div>
+        </div>
+      </div>
+
+      {/* Generate button */}
+      <div style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "390px", padding: "16px 24px 32px", background: `linear-gradient(transparent, ${COLORS.cream} 40%)`, zIndex: 10 }}>
+        <button
+          onClick={() => onGenerate({ season, proteins, carbs, veg, calories, macros, people })}
+          disabled={isLoading}
+          style={{
+            width: "100%", padding: "18px", borderRadius: "100px", border: "none",
+            background: isLoading ? COLORS.muted : COLORS.lime,
+            color: isLoading ? COLORS.cream : COLORS.dark, fontSize: "16px", fontWeight: "600",
+            fontFamily: "'DM Sans', sans-serif",
+            cursor: isLoading ? "not-allowed" : "pointer",
+            display: "flex", alignItems: "center", justifyContent: "center", gap: "10px",
+          }}
+        >
+          {isLoading
+            ? <><span style={{ animation: "spin 1s linear infinite", display: "inline-block" }}>✦</span>Thinking up ideas...</>
+            : "✦ Generate my dinner"
+          }
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── MEAL CARD ────────────────────────────────────────────────────────────────
+function MealCard({ meal, featured, onSelect }) {
+  return (
+    <div style={{
+      background: COLORS.card,
+      borderRadius: "24px", overflow: "hidden",
+      border: `1.5px solid ${featured ? COLORS.lime : COLORS.border}`,
+      boxShadow: featured ? `0 0 0 1px ${COLORS.lime}` : "none",
+    }}>
+      <button
+        onClick={() => onSelect(meal)}
+        style={{ width: "100%", background: "none", border: "none", cursor: "pointer", textAlign: "left", padding: "24px" }}
+        onMouseDown={e => e.currentTarget.style.opacity = "0.8"}
+        onMouseUp={e => e.currentTarget.style.opacity = "1"}
+      >
+        {featured && (
+          <div style={{ display: "inline-flex", alignItems: "center", background: COLORS.lime, borderRadius: "100px", padding: "3px 10px", marginBottom: "12px" }}>
+            <span style={{ fontSize: "11px", fontWeight: "700", color: COLORS.dark, fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.05em" }}>✦ Top pick</span>
+          </div>
+        )}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: "32px", marginBottom: "10px" }}>{meal.emoji}</div>
+            <div style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: "21px", fontWeight: "400", color: COLORS.dark, marginBottom: "6px" }}>
+              {meal.name}
+            </div>
+            <div style={{ fontSize: "13px", color: COLORS.muted, fontFamily: "'DM Sans', sans-serif", display: "flex", gap: "10px", marginBottom: meal.macros ? "12px" : "0" }}>
+              <span>⏱ {meal.time}</span><span>· {meal.difficulty}</span><span>· 🔥 {meal.calories} kcal</span>
+            </div>
+            {meal.macros && (
+              <MacroBar protein={meal.macros.protein} carbs={meal.macros.carbs} fat={meal.macros.fat} calories={meal.calories} />
+            )}
+          </div>
+          <div style={{ width: "34px", height: "34px", borderRadius: "50%", background: featured ? COLORS.lime : COLORS.cream, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "15px", flexShrink: 0, marginLeft: "12px" }}>→</div>
+        </div>
+      </button>
+    </div>
+  );
+}
+
+// ─── SCREEN 2: RESULTS ────────────────────────────────────────────────────────
+function ResultsScreen({ prefs, meals, onSelect, onBack, onRegenerate, isLoading }) {
+  const [cuisine, setCuisine] = useState("Any");
+
+  const summaryParts = [
+    SEASON_EMOJI[prefs.season] + " " + prefs.season,
+    !prefs.proteins.includes("Any") && prefs.proteins.join(", "),
+    `${prefs.calories} kcal`,
+    `${prefs.people} ${prefs.people === 1 ? "serving" : "servings"}`,
+  ].filter(Boolean);
+
+  return (
+    <div style={{ paddingBottom: "260px" }}>
+      <div style={{ padding: "56px 24px 20px" }}>
+        <button onClick={onBack} style={{ background: "none", border: "none", cursor: "pointer", padding: "0 0 12px 0", color: COLORS.muted, fontSize: "14px", fontFamily: "'DM Sans', sans-serif" }}>
+          ← Back
+        </button>
+        <h2 style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: "30px", fontWeight: "400", color: COLORS.dark, margin: "0 0 8px", lineHeight: 1.1 }}>
+          Here's what<br />you can make
+        </h2>
+        <p style={{ color: COLORS.muted, fontSize: "13px", fontFamily: "'DM Sans', sans-serif", margin: 0 }}>
+          {summaryParts.join(" · ")}
+        </p>
+      </div>
+
+      {/* Meal cards */}
+      <div style={{ padding: "0 24px", display: "flex", flexDirection: "column", gap: "14px" }}>
+        {meals.map((meal, i) => <MealCard key={meal.id} meal={meal} featured={i === 0} onSelect={onSelect} />)}
+      </div>
+
+      {/* Cuisine + Regenerate — fixed at bottom */}
+      <div style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "390px", padding: "16px 24px 32px", background: `linear-gradient(transparent, ${COLORS.cream} 30%)` }}>
+
+        {/* Cuisine label */}
+        <div style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "0.1em", color: COLORS.muted, textTransform: "uppercase", fontFamily: "'DM Sans', sans-serif", marginBottom: "10px" }}>
+          🍽 Try a cuisine
+        </div>
+
+        {/* Cuisine chips — wrapped, all visible */}
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "12px" }}>
+          {CUISINE_CHIPS.map(c => (
+            <Chip key={c} label={c} selected={cuisine === c} onClick={() => setCuisine(c)} accent />
+          ))}
+        </div>
+
+        {/* Regenerate button */}
+        <button
+          onClick={() => onRegenerate(cuisine)}
+          disabled={isLoading}
+          style={{
+            width: "100%", padding: "16px", borderRadius: "100px",
+            border: `1.5px solid ${cuisine !== "Any" ? "transparent" : COLORS.border}`,
+            background: isLoading ? COLORS.muted : cuisine !== "Any" ? COLORS.dark : "transparent",
+            color: isLoading ? COLORS.cream : cuisine !== "Any" ? COLORS.cream : COLORS.dark,
+            fontSize: "15px", fontWeight: "600",
+            fontFamily: "'DM Sans', sans-serif",
+            cursor: isLoading ? "not-allowed" : "pointer",
+            transition: "all 0.2s ease",
+            display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
+          }}
+        >
+          {isLoading
+            ? <><span style={{ animation: "spin 1s linear infinite", display: "inline-block" }}>✦</span>Finding ideas...</>
+            : `↻ ${cuisine !== "Any" ? `Regenerate as ${cuisine}` : "Regenerate ideas"}`
+          }
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── SCREEN 3: RECIPE ─────────────────────────────────────────────────────────
+function RecipeScreen({ meal, onBack }) {
+  const allIngredients              = [...(meal.ingredients || []), ...(meal.pantryUsed || [])];
+  const [ingredients, setIngredients] = useState(allIngredients);
+  const [swappingIndex, setSwappingIndex] = useState(null);
+  const [swapVal, setSwapVal]       = useState("");
+  const [method, setMethod]         = useState(meal.method);
+  const [regenLoading, setRegenLoading] = useState(false);
+  const [hasEdits, setHasEdits]     = useState(false);
+  const [copied, setCopied]         = useState(false);
+
+  const exportIngredients = () => {
+    const text = `${meal.name} — Ingredients\n\n${ingredients.join("\n")}`;
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }).catch(() => {
+      // Fallback for environments where clipboard API isn't available
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  const removeIngredient = (i) => {
+    setIngredients(prev => prev.filter((_, idx) => idx !== i));
+    setHasEdits(true);
+    if (swappingIndex === i) setSwappingIndex(null);
+  };
+
+  const startSwap = (i) => {
+    setSwapVal(ingredients[i]);
+    setSwappingIndex(i);
+  };
+
+  const confirmSwap = (i) => {
+    const val = swapVal.trim();
+    if (!val) { setSwappingIndex(null); return; }
+    setIngredients(prev => prev.map((ing, idx) => idx === i ? val : ing));
+    setSwappingIndex(null);
+    setSwapVal("");
+    setHasEdits(true);
+  };
+
+  const regenerateMethod = async () => {
+    setRegenLoading(true);
+    const prompt = `You are a cooking assistant. A user has modified the ingredients for "${meal.name}".
+
+Updated ingredients: ${ingredients.join(", ")}
+
+Write a new method (4-5 steps) for this dish using only these ingredients. Assume standard pantry staples like oil, salt and pepper are available.
+
+Respond ONLY with a JSON array of steps, e.g. ["Step one.", "Step two.", "Step three.", "Step four."]
+No explanation, no markdown.`;
+
+    try {
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 600,
+          messages: [{ role: "user", content: prompt }],
+        }),
+      });
+      const data  = await response.json();
+      const text  = data.content[0].text;
+      const clean = text.replace(/```json|```/g, "").trim();
+      const steps = JSON.parse(clean);
+      setMethod(steps);
+      setHasEdits(false);
+    } catch {
+      // silently keep existing method if API fails
+    } finally {
+      setRegenLoading(false);
+    }
+  };
+
+  return (
+    <div style={{ paddingBottom: "40px" }}>
+      <style>{`::-webkit-scrollbar{display:none}`}</style>
+
+      {/* Hero */}
+      <div style={{ background: COLORS.cream, padding: "56px 24px 24px", borderBottom: `1px solid ${COLORS.border}` }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
+          <button onClick={onBack} style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.muted, fontSize: "14px", fontFamily: "'DM Sans', sans-serif" }}>← Back</button>
+          <button
+            onClick={exportIngredients}
+            style={{
+              display: "flex", alignItems: "center", gap: "6px",
+              padding: "7px 14px", borderRadius: "100px", cursor: "pointer",
+              border: `1.5px solid ${copied ? "transparent" : COLORS.border}`,
+              background: copied ? COLORS.lime : "transparent",
+              color: copied ? COLORS.dark : COLORS.dark,
+              fontSize: "12px", fontFamily: "'DM Sans', sans-serif", fontWeight: "600",
+              transition: "all 0.2s ease",
+            }}
+          >
+            {copied ? "✓ Copied!" : "↑ Export ingredients"}
+          </button>
+        </div>
+        <div style={{ fontSize: "48px", marginBottom: "16px" }}>{meal.emoji}</div>
+        <h2 style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: "32px", fontWeight: "400", color: COLORS.dark, margin: "0 0 12px" }}>{meal.name}</h2>
+        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+          <span style={{ background: COLORS.lime, borderRadius: "100px", padding: "5px 14px", fontSize: "13px", fontWeight: "600", color: COLORS.dark, fontFamily: "'DM Sans', sans-serif" }}>⏱ {meal.time}</span>
+          <span style={{ background: COLORS.card, borderRadius: "100px", padding: "5px 14px", fontSize: "13px", color: COLORS.dark, fontFamily: "'DM Sans', sans-serif" }}>{meal.difficulty}</span>
+          <span style={{ background: COLORS.card, borderRadius: "100px", padding: "5px 14px", fontSize: "13px", color: COLORS.dark, fontFamily: "'DM Sans', sans-serif" }}>🔥 {meal.calories} kcal</span>
+        </div>
+        {meal.macros && (
+          <div style={{ marginTop: "16px" }}>
+            <MacroBar protein={meal.macros.protein} carbs={meal.macros.carbs} fat={meal.macros.fat} size="lg" calories={meal.calories} />
+          </div>
+        )}
+      </div>
+
+      <div style={{ padding: "32px 24px", display: "flex", flexDirection: "column", gap: "32px" }}>
+
+        {/* Ingredients */}
+        <div>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "16px" }}>
+            <h3 style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: "22px", fontWeight: "400", color: COLORS.dark, margin: 0 }}>Ingredients</h3>
+            <span style={{ fontSize: "11px", color: COLORS.muted, fontFamily: "'DM Sans', sans-serif", fontStyle: "italic" }}>swap or remove</span>
+          </div>
+
+          {ingredients.map((ing, i) => (
+            <div key={i}>
+              {swappingIndex === i ? (
+                /* Swap input row */
+                <div style={{ padding: "10px 0", borderBottom: i < ingredients.length - 1 ? `1px solid ${COLORS.border}` : "none", display: "flex", gap: "8px", alignItems: "center" }}>
+                  <input
+                    autoFocus
+                    value={swapVal}
+                    onChange={e => setSwapVal(e.target.value)}
+                    onKeyDown={e => { if (e.key === "Enter") confirmSwap(i); if (e.key === "Escape") setSwappingIndex(null); }}
+                    style={{
+                      flex: 1, padding: "9px 14px", borderRadius: "100px",
+                      border: `1.5px solid ${COLORS.dark}`, background: COLORS.card,
+                      fontSize: "14px", fontFamily: "'DM Sans', sans-serif",
+                      color: COLORS.dark, outline: "none",
+                    }}
+                  />
+                  <button onClick={() => confirmSwap(i)} style={{ width: 32, height: 32, borderRadius: "50%", background: COLORS.dark, border: "none", color: COLORS.lime, fontSize: "15px", cursor: "pointer", flexShrink: 0 }}>✓</button>
+                  <button onClick={() => setSwappingIndex(null)} style={{ width: 32, height: 32, borderRadius: "50%", background: "transparent", border: `1.5px solid ${COLORS.border}`, color: COLORS.muted, fontSize: "13px", cursor: "pointer", flexShrink: 0 }}>✕</button>
+                </div>
+              ) : (
+                /* Normal ingredient row */
+                <div style={{ padding: "14px 0", borderBottom: i < ingredients.length - 1 ? `1px solid ${COLORS.border}` : "none", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "10px" }}>
+                  <span style={{ fontSize: "15px", color: COLORS.dark, fontFamily: "'DM Sans', sans-serif", lineHeight: 1.4, flex: 1 }}>{ing}</span>
+                  <div style={{ display: "flex", gap: "8px", flexShrink: 0 }}>
+                    {/* Swap icon — solid lime circle */}
+                    <button
+                      onClick={() => startSwap(i)}
+                      title="Swap ingredient"
+                      style={{
+                        width: "30px", height: "30px", borderRadius: "50%",
+                        background: COLORS.lime, border: "none",
+                        cursor: "pointer", fontSize: "14px", color: COLORS.dark,
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        flexShrink: 0, fontWeight: "700", lineHeight: 1,
+                      }}
+                    >⇄</button>
+                    {/* Remove icon */}
+                    <button
+                      onClick={() => removeIngredient(i)}
+                      title="Remove ingredient"
+                      style={{ background: "none", border: "none", cursor: "pointer", fontSize: "14px", color: COLORS.border, padding: "0", lineHeight: 1 }}
+                    >✕</button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Regenerate method CTA — shown when edits have been made */}
+        {hasEdits && (
+          <button
+            onClick={regenerateMethod}
+            disabled={regenLoading}
+            style={{
+              width: "100%", padding: "16px", borderRadius: "100px", border: "none",
+              background: regenLoading ? COLORS.muted : COLORS.lime,
+              color: COLORS.dark, fontSize: "15px", fontWeight: "700",
+              fontFamily: "'DM Sans', sans-serif", cursor: regenLoading ? "not-allowed" : "pointer",
+              display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
+            }}
+          >
+            {regenLoading
+              ? <><span style={{ animation: "spin 1s linear infinite", display: "inline-block" }}>✦</span>Updating method...</>
+              : "✦ Regenerate method with new ingredients"
+            }
+          </button>
+        )}
+
+        {/* Method */}
+        <div>
+          <h3 style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: "22px", fontWeight: "400", color: COLORS.dark, margin: "0 0 16px" }}>Method</h3>
+          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            {method.map((step, i) => (
+              <div key={i} style={{ display: "flex", gap: "16px", alignItems: "flex-start" }}>
+                <div style={{ width: "28px", height: "28px", borderRadius: "50%", background: COLORS.lime, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "13px", fontWeight: "700", color: COLORS.dark, fontFamily: "'DM Sans', sans-serif", flexShrink: 0, marginTop: "1px" }}>{i + 1}</div>
+                <p style={{ margin: 0, fontSize: "15px", lineHeight: "1.6", color: COLORS.dark, fontFamily: "'DM Sans', sans-serif" }}>{step}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── ROOT ─────────────────────────────────────────────────────────────────────
+export default function App() {
+  const [screen, setScreen]             = useState("input");
+  const [prefs, setPrefs]               = useState(null);
+  const [meals, setMeals]               = useState(null);
+  const [selectedMeal, setSelectedMeal] = useState(null);
+  const [isLoading, setIsLoading]       = useState(false);
+  const [apiError, setApiError]         = useState(null);
+
+  const handleGenerate = async (p) => {
+    setPrefs(p);
+    setApiError(null);
+    setIsLoading(true);
+    try {
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 1500,
+          messages: [{ role: "user", content: buildPrompt(p) }],
+        }),
+      });
+      const data      = await response.json();
+      const text      = data.content[0].text;
+      const clean     = text.replace(/```json|```/g, "").trim();
+      const generated = JSON.parse(clean);
+      setMeals(generated.map((meal, i) => ({ ...meal, id: i + 1 })));
+    } catch (err) {
+      setApiError("Couldn't connect — showing example meals instead.");
+      setMeals(MOCK_MEALS);
+    } finally {
+      setIsLoading(false);
+      setScreen("results");
+    }
+  };
+
+  return (
+    <div style={{ background: COLORS.cream, minHeight: "100vh", display: "flex", justifyContent: "center" }}>
+      <div style={{ width: "390px", minHeight: "844px", background: COLORS.cream }}>
+        {screen === "input" && <InputScreen onGenerate={handleGenerate} isLoading={isLoading} />}
+        {screen === "results" && (
+          <>
+            {apiError && (
+              <div style={{ background: "#FFF0ED", borderBottom: `1px solid #F5C2B8`, padding: "10px 24px", fontSize: "12px", color: "#B94040", fontFamily: "'DM Sans', sans-serif" }}>
+                ⚠ {apiError}
+              </div>
+            )}
+            <ResultsScreen prefs={prefs} meals={meals} isLoading={isLoading} onSelect={(m) => { setSelectedMeal(m); setScreen("recipe"); }} onBack={() => setScreen("input")} onRegenerate={(cuisine) => handleGenerate({ ...prefs, cuisine })} />
+          </>
+        )}
+        {screen === "recipe" && <RecipeScreen meal={selectedMeal} onBack={() => setScreen("results")} />}
+      </div>
+    </div>
+  );
 }
