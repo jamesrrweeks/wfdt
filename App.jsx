@@ -16,70 +16,84 @@ const VIBE_CHIPS     = ["Comfort Food", "Quick & Light", "Fakeaway", "Something 
 const TIME_CHIPS     = ["15 mins", "30 mins", "45 mins+"];
 const CUISINE_CHIPS  = ["Any", "Italian", "Asian", "Mexican", "Middle Eastern", "Indian", "Japanese", "French", "American", "Mediterranean"];
 const PROTEIN_CATEGORIES = {
-  Poultry:      ["Chicken breast", "Chicken thighs", "Chicken mince", "Turkey", "Duck"],
-  Seafood:      ["Salmon", "White fish", "Prawns", "Tuna (canned)", "Mussels", "Squid"],
-  "Red meat":   ["Beef mince", "Beef steak", "Lamb chops", "Lamb mince", "Pork belly", "Pork mince", "Sausages"],
-  "Plant-based":["Eggs", "Tofu", "Tempeh", "Chickpeas", "Lentils", "Kidney beans", "Halloumi"],
+  "Chicken & Turkey": { emoji: "🍗", items: ["Chicken breast", "Chicken thighs", "Chicken mince", "Chicken drumsticks", "Chicken wings", "Turkey mince", "Turkey breast", "Duck", "Duck breast"] },
+  "Fish & Seafood":   { emoji: "🐟", items: ["Salmon", "Salmon fillet", "White fish", "Snapper", "Tarakihi", "Blue cod", "Prawns", "Tuna (canned)", "Sardines", "Mussels", "Squid", "Scallops", "Crab", "Smoked salmon"] },
+  "Beef & Lamb":      { emoji: "🥩", items: ["Beef mince", "Beef steak", "Beef strips", "Beef short ribs", "Beef brisket", "Lamb chops", "Lamb mince", "Lamb shoulder", "Lamb rack", "Lamb shank", "Sausages"] },
+  "Pork":             { emoji: "🐷", items: ["Pork belly", "Pork mince", "Pork chops", "Pork shoulder", "Pork ribs", "Bacon", "Ham", "Chorizo", "Pancetta", "Prosciutto"] },
+  "Veggie & Eggs":    { emoji: "🥚", items: ["Eggs", "Tofu", "Firm tofu", "Silken tofu", "Tempeh", "Chickpeas", "Lentils", "Red lentils", "Kidney beans", "Black beans", "Butter beans", "Edamame", "Halloumi", "Paneer", "Quorn mince"] },
 };
 
 const CARB_CATEGORIES = {
-  Grains:       ["Pasta", "Rice", "Noodles", "Couscous", "Quinoa", "Polenta"],
-  Bread:        ["Sourdough", "Flatbread", "Tortillas", "Pita", "Bao buns"],
-  "Root veg":   ["Kumara", "Potatoes", "Parsnip", "Cassava"],
-  Other:        ["No carbs"],
+  "Pasta & Noodles":  { emoji: "🍝", items: ["Pasta", "Spaghetti", "Penne", "Fettuccine", "Gnocchi", "Orzo", "Noodles", "Udon noodles", "Soba noodles", "Rice noodles", "Glass noodles", "Couscous", "Polenta"] },
+  "Rice & Grains":    { emoji: "🍚", items: ["Rice", "Basmati rice", "Jasmine rice", "Brown rice", "Arborio rice", "Quinoa", "Bulgur wheat", "Pearl barley", "Freekeh", "Farro", "Millet"] },
+  "Bread & Wraps":    { emoji: "🫓", items: ["Sourdough", "White bread", "Wholegrain bread", "Flatbread", "Tortillas", "Corn tortillas", "Pita", "Naan", "Bao buns", "Burger buns", "Crumpets", "English muffins"] },
+  "Potato & Root":    { emoji: "🥔", items: ["Potatoes", "Kumara", "Sweet potato", "Baby potatoes", "Parsnip", "Cassava", "Taro", "Yam"] },
+  "No carbs":         { emoji: "🚫", items: ["No carbs"] },
 };
 
-const SEASONAL_VEG_CATEGORIES = {
-  Summer: {
-    Fruiting:   ["Courgette", "Capsicum", "Tomatoes", "Corn", "Cucumber", "Eggplant"],
-    Legumes:    ["Beans", "Peas", "Broad beans"],
-    Leafy:      ["Spinach", "Lettuce", "Silverbeet"],
-  },
-  Autumn: {
-    "Root & squash": ["Pumpkin", "Kumara", "Carrot", "Beetroot"],
-    Brassica:        ["Broccoli", "Cauliflower", "Cabbage"],
-    Leafy:           ["Silverbeet", "Spinach", "Kale"],
-    Other:           ["Leek", "Mushrooms", "Capsicum", "Feijoa"],
-  },
-  Winter: {
-    "Root & squash": ["Kumara", "Pumpkin", "Parsnip", "Carrot", "Beetroot"],
-    Brassica:        ["Cauliflower", "Cabbage", "Kale", "Brussels sprouts", "Broccoli"],
-    Allium:          ["Leek", "Onion", "Spring onion"],
-    Leafy:           ["Silverbeet", "Kale", "Spinach"],
-  },
-  Spring: {
-    Asparagus:  ["Asparagus"],
-    Legumes:    ["Peas", "Broad beans", "Beans"],
-    Leafy:      ["Spinach", "Lettuce", "Silverbeet"],
-    Other:      ["Radish", "Spring onion", "Courgette", "Broccoli"],
-  },
+const SEASONAL_VEG = {
+  Summer:     ["Courgette", "Capsicum", "Tomatoes", "Cherry tomatoes", "Corn", "Cucumber", "Eggplant", "Beans", "Green beans", "Peas", "Spinach", "Lettuce", "Rocket", "Zucchini flowers", "Basil"],
+  Autumn:     ["Pumpkin", "Butternut squash", "Kumara", "Carrot", "Beetroot", "Broccoli", "Broccolini", "Cauliflower", "Cabbage", "Silverbeet", "Kale", "Leek", "Mushrooms", "Shiitake", "Capsicum", "Feijoa", "Parsnip"],
+  Winter:     ["Kumara", "Pumpkin", "Parsnip", "Carrot", "Beetroot", "Cauliflower", "Cabbage", "Savoy cabbage", "Kale", "Brussels sprouts", "Broccoli", "Leek", "Silverbeet", "Spinach", "Onion", "Spring onion", "Celeriac"],
+  Spring:     ["Asparagus", "Peas", "Snap peas", "Broad beans", "Beans", "Spinach", "Baby spinach", "Lettuce", "Radish", "Spring onion", "Courgette", "Broccolini", "Fennel", "Artichoke"],
+  "All year": ["Onion", "Red onion", "Garlic", "Celery", "Capsicum", "Spinach", "Baby spinach", "Broccoli", "Courgette", "Mushrooms", "Button mushrooms", "Silverbeet", "Carrot", "Tomatoes", "Cucumber", "Avocado", "Corn", "Pumpkin"],
 };
 
 const PANTRY_STAPLES = ["Olive oil", "Garlic", "Salt & pepper", "Onion", "Soy sauce", "Butter", "Lemon"];
+
+// ─── TYPE-AHEAD DATABASE ──────────────────────────────────────────────────────
+const TYPEAHEAD_INGREDIENTS = [
+  "Anchovies","Apple","Apricots","Artichoke","Asparagus","Avocado","Baby spinach","Bacon",
+  "Balsamic vinegar","Banana","Basil","Bay leaves","Bean sprouts","Black beans","Black olives",
+  "Bok choy","Breadcrumbs","Broccolini","Brown sugar","Capers","Cardamom","Cashews",
+  "Celery","Cheddar cheese","Chilli flakes","Chilli sauce","Chorizo","Cider vinegar",
+  "Cinnamon","Coconut cream","Coconut milk","Coriander","Corn flour","Cream","Cream cheese",
+  "Crème fraîche","Cumin","Curry paste","Curry powder","Dates","Dill","Dried apricots",
+  "Dried cranberries","Dried oregano","Edamame","Fennel","Feta cheese","Fish sauce",
+  "Five spice","Flour","Garam masala","Ginger","Greek yoghurt","Green beans","Green olives",
+  "Harissa","Hoisin sauce","Honey","Jalapeño","Kale","Ketchup","Leeks","Lime","Lime leaves",
+  "Mango","Maple syrup","Mayonnaise","Mint","Miso paste","Mixed herbs","Mozzarella",
+  "Mushrooms","Mustard","Mustard seeds","Naan","Nutmeg","Oats","Oyster sauce","Paprika",
+  "Parmesan","Parsley","Passata","Peanut butter","Peanuts","Pecans","Pesto","Pine nuts",
+  "Pinenuts","Pomegranate","Pomegranate molasses","Pumpkin seeds","Red cabbage","Red wine",
+  "Red wine vinegar","Rice wine vinegar","Ricotta","Rocket","Rosemary","Sesame oil",
+  "Sesame seeds","Shallots","Smoked paprika","Sour cream","Spring onions","Star anise",
+  "Stock cubes","Chicken stock","Beef stock","Vegetable stock","Sunflower seeds","Sweet chilli",
+  "Tahini","Tamarind","Thyme","Tinned tomatoes","Tomato paste","Turmeric","Vanilla",
+  "Walnuts","White wine","White wine vinegar","Worcestershire sauce","Yoghurt","Za'atar",
+  "Sumac","Dukkah","Preserved lemon","Rose water","Pomegranate seeds","Chipotle paste",
+  "Sriracha","Nam pla","Ponzu","Mirin","Sake","Shaoxing wine","Dried chilli","Chilli powder",
+  "Smoked salt","Sea salt flakes","Black pepper","White pepper","Mixed spice","Allspice",
+  "Cloves","Saffron","Dried thyme","Dried rosemary","Dried basil","Italian herbs","Ras el hanout",
+  "Baharat","Berbere","Harissa paste","Sun-dried tomatoes","Caramelised onions","Roasted capsicum",
+];
 
 // ─── MOCK DATA ────────────────────────────────────────────────────────────────
 const MOCK_MEALS = [
   {
     id: 1, name: "Spaghetti Carbonara", emoji: "🍝",
+    description: "Silky, indulgent pasta with crispy pancetta and a rich egg sauce.",
     time: "25 mins", difficulty: "Easy", calories: 520,
     ingredients: ["200g spaghetti", "100g pancetta", "2 large eggs + 1 yolk", "50g pecorino"],
-    pantryUsed: ["Garlic", "Salt & pepper", "Olive oil"],
+    pantryUsed: ["2 cloves garlic", "1 tsp salt & pepper", "1 tbsp olive oil"],
     macros: { protein: 28, carbs: 42, fat: 30 },
     method: ["Boil spaghetti in salted water until al dente. Reserve a mug of pasta water.", "Fry pancetta until crispy. Add garlic for the last minute, remove from heat.", "Whisk eggs, yolk, and most of the cheese. Season generously with black pepper.", "Toss hot pasta with pancetta off the heat. Add egg mix and toss fast with pasta water until silky.", "Serve with remaining cheese and a crack of pepper."],
   },
   {
     id: 2, name: "Chicken Stir Fry", emoji: "🥢",
+    description: "Fast, saucy and punchy — glossy chicken with crisp veg over steamed rice.",
     time: "20 mins", difficulty: "Easy", calories: 410,
     ingredients: ["2 chicken breasts, sliced", "Broccoli & capsicum", "Rice to serve"],
-    pantryUsed: ["Soy sauce", "Garlic", "Olive oil", "Salt & pepper"],
+    pantryUsed: ["3 tbsp soy sauce", "2 cloves garlic", "1 tbsp olive oil", "1 tsp salt & pepper"],
     macros: { protein: 38, carbs: 35, fat: 27 },
     method: ["Mix soy sauce, garlic and a splash of sesame oil in a bowl.", "Heat a wok until very hot. Cook chicken in batches until golden.", "Add broccoli, stir fry 3 mins. Add capsicum and toss.", "Pour over sauce, cook 1–2 mins until coated and glossy.", "Serve over rice."],
   },
   {
     id: 3, name: "Halloumi Wraps", emoji: "🫓",
+    description: "Golden, squeaky halloumi with creamy avocado and a chilli kick.",
     time: "15 mins", difficulty: "Easy", calories: 480,
     ingredients: ["250g halloumi, sliced", "4 flour tortillas", "1 avocado", "Cherry tomatoes", "Mixed leaves"],
-    pantryUsed: ["Olive oil", "Lemon", "Salt & pepper"],
+    pantryUsed: ["1 tbsp olive oil", "½ lemon, juiced", "1 tsp salt & pepper"],
     macros: { protein: 22, carbs: 38, fat: 40 },
     method: ["Slice halloumi into 1cm planks. Heat a dry griddle until hot.", "Cook halloumi 2 mins each side until golden.", "Warm tortillas in a dry pan or microwave.", "Mash avocado with lemon and salt. Spread over each wrap.", "Layer leaves, tomatoes, halloumi. Fold and serve."],
   },
@@ -90,10 +104,9 @@ function buildPrompt(prefs) {
   const proteins = prefs.proteins.includes("Any") ? "any protein" : prefs.proteins.join(", ");
   const carbs    = prefs.carbs.includes("Any") ? "any carbs" : prefs.carbs.join(", ");
   const veg      = prefs.veg.includes("Any") ? `any seasonal NZ ${prefs.season} vegetables` : prefs.veg.join(", ");
-  const cuisineNote = prefs.cuisine && prefs.cuisine !== "Any" ? `- Cuisine style: ${prefs.cuisine} — all 3 meals must be ${prefs.cuisine} in style` : "";
-  const macroNote = prefs.macros
-    ? `- Macro target: aim for roughly ${prefs.macros.protein}% protein, ${prefs.macros.carbs}% carbs, ${prefs.macros.fat}% fat per serving`
-    : "";
+  const cuisineNote  = prefs.cuisine && prefs.cuisine !== "Any" ? `- Cuisine style: ${prefs.cuisine} — all 3 meals must be ${prefs.cuisine} in style` : "";
+  const macroNote    = prefs.macros ? `- Macro target: aim for roughly ${prefs.macros.protein}% protein, ${prefs.macros.carbs}% carbs, ${prefs.macros.fat}% fat per serving` : "";
+  const freeTextNote = prefs.freeText && prefs.freeText.trim() ? `- Extra instructions from the user: ${prefs.freeText.trim()}` : "";
 
   return `You are a meal planning assistant for New Zealand home cooks. It is ${prefs.season} in NZ.
 
@@ -106,6 +119,7 @@ The user wants dinner tonight:
 - Season: ${prefs.season} in New Zealand — reflect this in the meal style and ingredients
 ${cuisineNote}
 ${macroNote}
+${freeTextNote}
 
 Assume the user has these pantry staples available: olive oil, garlic, salt, pepper, onion, soy sauce, butter, lemon.
 
@@ -116,11 +130,12 @@ Respond ONLY with a valid JSON array. No explanation, no markdown, no preamble:
   {
     "name": "Meal name",
     "emoji": "single relevant emoji",
+    "description": "One punchy sentence selling the dish — flavour, texture, appeal. 10-15 words.",
     "time": "X mins",
     "difficulty": "Easy",
     "calories": 500,
     "ingredients": ["quantity + ingredient (hero ingredients only, not pantry staples)"],
-    "pantryUsed": ["Garlic", "Olive oil"],
+    "pantryUsed": ["2 tbsp olive oil", "3 cloves garlic", "1 tsp salt"],
     "macros": { "protein": 30, "carbs": 40, "fat": 30 },
     "method": ["Step one.", "Step two.", "Step three.", "Step four.", "Step five."]
   }
@@ -128,7 +143,7 @@ Respond ONLY with a valid JSON array. No explanation, no markdown, no preamble:
 
 Rules:
 - ingredients: 4–6 hero items only, scaled to ${prefs.people} serving(s). Do NOT include pantry staples here.
-- pantryUsed: list which pantry staples this recipe uses from: olive oil, garlic, salt & pepper, onion, soy sauce, butter, lemon
+- pantryUsed: list which pantry staples this recipe uses WITH quantities e.g. "2 tbsp olive oil", "3 cloves garlic", "1 tsp salt & pepper". Scale to ${prefs.people} serving(s).
 - method: 4–5 steps, written assuming pantry staples are available
 - Make all 3 meals distinct in style`;
 }
@@ -163,154 +178,6 @@ function Stepper({ value, onChange }) {
       {btn("−", () => onChange(Math.max(1, value - 1)))}
       <span style={{ fontSize: "18px", fontWeight: "600", minWidth: "20px", textAlign: "center", color: COLORS.dark }}>{value}</span>
       {btn("+", () => onChange(Math.min(8, value + 1)))}
-    </div>
-  );
-}
-
-// ─── PROGRESSIVE DISCLOSURE SELECTOR ────────────────────────────────────────
-function ProgressiveDisclosureSelector({ icon, label, sublabel, categories, selected, onChange }) {
-  const [activeCategory, setActiveCategory] = useState(null);
-  const [inputVal, setInputVal]             = useState("");
-  const selectedItems = selected.filter(s => s !== "Any");
-
-  const toggleCategory = (cat) => {
-    setActiveCategory(prev => prev === cat ? null : cat);
-    setInputVal("");
-  };
-
-  const toggleChip = (chip) => {
-    const next = selectedItems.includes(chip)
-      ? selectedItems.filter(s => s !== chip)
-      : [...selectedItems, chip];
-    onChange(next.length === 0 ? ["Any"] : next);
-  };
-
-  const confirmCustom = () => {
-    const val = inputVal.trim();
-    if (!val) return;
-    onChange([...selectedItems, val]);
-    setInputVal("");
-  };
-
-  const countInCategory = (cat) =>
-    categories[cat].filter(c => selectedItems.includes(c)).length;
-
-  return (
-    <div>
-      {/* Section header */}
-      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: "12px" }}>
-        <div style={{ display: "flex", alignItems: "baseline", gap: "8px" }}>
-          <label style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "0.1em", color: COLORS.muted, textTransform: "uppercase", fontFamily: "'DM Sans', sans-serif" }}>
-            {icon} {label}
-          </label>
-          {sublabel && <span style={{ fontSize: "11px", color: COLORS.muted, fontFamily: "'DM Sans', sans-serif", fontStyle: "italic" }}>{sublabel}</span>}
-        </div>
-        {selectedItems.length > 0 && (
-          <button onClick={() => { onChange(["Any"]); setActiveCategory(null); }}
-            style={{ background: "none", border: "none", cursor: "pointer", fontSize: "11px", color: COLORS.muted, fontFamily: "'DM Sans', sans-serif", textDecoration: "underline" }}>
-            Clear
-          </button>
-        )}
-      </div>
-
-      {/* Step 1 — Category pills */}
-      <div style={{ display: "flex", gap: "8px", overflowX: "auto", paddingBottom: "4px" }}>
-        {Object.keys(categories).map(cat => {
-          const count     = countInCategory(cat);
-          const isActive  = activeCategory === cat;
-          return (
-            <button key={cat} onClick={() => toggleCategory(cat)} style={{
-              padding: "8px 14px", borderRadius: "100px", flexShrink: 0,
-              border: `1.5px solid ${isActive || count > 0 ? COLORS.dark : COLORS.border}`,
-              background: isActive ? COLORS.dark : count > 0 ? COLORS.card : "transparent",
-              color: isActive ? COLORS.cream : COLORS.dark,
-              fontSize: "13px", fontFamily: "'DM Sans', sans-serif",
-              fontWeight: isActive || count > 0 ? "600" : "400",
-              cursor: "pointer", whiteSpace: "nowrap",
-              transition: "all 0.15s ease",
-              display: "flex", alignItems: "center", gap: "6px",
-            }}>
-              {cat}
-              {count > 0 && (
-                <span style={{
-                  background: isActive ? COLORS.lime : COLORS.dark,
-                  color: isActive ? COLORS.dark : COLORS.cream,
-                  borderRadius: "100px", padding: "0px 6px",
-                  fontSize: "11px", fontWeight: "700", fontFamily: "'DM Sans', sans-serif",
-                }}>
-                  {count}
-                </span>
-              )}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Step 2 — Specific chips for active category */}
-      {activeCategory && (
-        <div style={{ marginTop: "12px", padding: "16px", background: COLORS.card, borderRadius: "16px" }}>
-          <div style={{ fontSize: "10px", fontWeight: "700", letterSpacing: "0.1em", color: COLORS.muted, textTransform: "uppercase", fontFamily: "'DM Sans', sans-serif", marginBottom: "12px" }}>
-            {activeCategory}
-          </div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-            {categories[activeCategory].map(chip => {
-              const isSelected = selectedItems.includes(chip);
-              return (
-                <button key={chip} onClick={() => toggleChip(chip)} style={{
-                  padding: "8px 14px", borderRadius: "100px",
-                  border: `1.5px solid ${isSelected ? "transparent" : COLORS.border}`,
-                  background: isSelected ? COLORS.dark : COLORS.cream,
-                  color: isSelected ? COLORS.cream : COLORS.dark,
-                  fontSize: "13px", fontFamily: "'DM Sans', sans-serif",
-                  fontWeight: isSelected ? "600" : "400",
-                  cursor: "pointer", transition: "all 0.12s ease",
-                }}>
-                  {chip}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Open text fallback at bottom of expanded category */}
-          <div style={{ display: "flex", gap: "8px", alignItems: "center", marginTop: "12px", paddingTop: "12px", borderTop: `1px solid ${COLORS.border}` }}>
-            <input
-              value={inputVal}
-              onChange={e => setInputVal(e.target.value)}
-              onKeyDown={e => { if (e.key === "Enter") confirmCustom(); }}
-              placeholder={`Other ${activeCategory.toLowerCase()}...`}
-              style={{
-                flex: 1, padding: "8px 14px", borderRadius: "100px",
-                border: `1.5px solid ${COLORS.border}`, background: COLORS.cream,
-                fontSize: "13px", fontFamily: "'DM Sans', sans-serif",
-                color: COLORS.dark, outline: "none",
-              }}
-            />
-            {inputVal.trim() && (
-              <button onClick={confirmCustom} style={{
-                width: 32, height: 32, borderRadius: "50%", background: COLORS.dark,
-                border: "none", color: COLORS.lime, fontSize: "15px", cursor: "pointer", flexShrink: 0,
-              }}>✓</button>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Selected items summary */}
-      {selectedItems.length > 0 && (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginTop: "10px" }}>
-          {selectedItems.map(item => (
-            <button key={item} onClick={() => toggleChip(item)} style={{
-              padding: "5px 11px", borderRadius: "100px",
-              border: "none", background: COLORS.dark,
-              color: COLORS.cream, fontSize: "12px", fontFamily: "'DM Sans', sans-serif",
-              fontWeight: "600", cursor: "pointer",
-              display: "flex", alignItems: "center", gap: "5px",
-            }}>
-              {item} <span style={{ opacity: 0.5, fontSize: "10px" }}>✕</span>
-            </button>
-          ))}
-        </div>
-      )}
     </div>
   );
 }
@@ -517,6 +384,263 @@ function MacroSelector({ value, onChange }) {
   );
 }
 
+// ─── TYPE-AHEAD INPUT (shared) ────────────────────────────────────────────────
+function TypeAheadInput({ placeholder, selectedItems, onAdd }) {
+  const [val, setVal] = useState("");
+
+  const confirm = (item) => {
+    const v = (item || val).trim();
+    if (!v) return;
+    onAdd(v);
+    setVal("");
+  };
+
+  const suggestions = val.trim().length >= 2
+    ? TYPEAHEAD_INGREDIENTS.filter(s => s.toLowerCase().includes(val.toLowerCase()) && !selectedItems.includes(s)).slice(0, 5)
+    : [];
+
+  return (
+    <div style={{ position: "relative", marginTop: "12px", paddingTop: "12px", borderTop: `1px solid ${COLORS.border}` }}>
+      <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+        <input
+          value={val}
+          onChange={e => setVal(e.target.value)}
+          onKeyDown={e => { if (e.key === "Enter") confirm(); if (e.key === "Escape") setVal(""); }}
+          placeholder={placeholder}
+          style={{ flex: 1, padding: "8px 14px", borderRadius: "100px", border: `1.5px solid ${COLORS.border}`, background: "transparent", fontSize: "12px", fontFamily: "'DM Sans', sans-serif", color: COLORS.dark, outline: "none" }}
+        />
+        {val.trim() && (
+          <button onClick={() => confirm()} style={{ width: 30, height: 30, borderRadius: "50%", background: COLORS.dark, border: "none", color: COLORS.lime, fontSize: "14px", cursor: "pointer", flexShrink: 0 }}>✓</button>
+        )}
+      </div>
+      {suggestions.length > 0 && (
+        <div style={{ position: "absolute", left: 0, right: 0, top: "100%", zIndex: 20, background: COLORS.cream, border: `1.5px solid ${COLORS.border}`, borderRadius: "14px", marginTop: "4px", overflow: "hidden", boxShadow: "0 4px 12px rgba(0,0,0,0.08)" }}>
+          {suggestions.map(s => (
+            <button key={s} onClick={() => confirm(s)}
+              style={{ width: "100%", padding: "9px 14px", background: "none", border: "none", borderBottom: `1px solid ${COLORS.border}`, cursor: "pointer", textAlign: "left", fontSize: "13px", fontFamily: "'DM Sans', sans-serif", color: COLORS.dark }}
+              onMouseEnter={e => e.currentTarget.style.background = COLORS.card}
+              onMouseLeave={e => e.currentTarget.style.background = "none"}
+            >{s}</button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── CATEGORY CHIP SELECTOR (protein + carbs) ─────────────────────────────────
+// Same visual pattern as VegSelector — category tabs on top, chips below
+function CategoryChipSelector({ icon, label, categories, selected, onChange }) {
+  const catNames = Object.keys(categories);
+  const [activeTab, setActiveTab] = useState(catNames[0]);
+  const selectedItems = selected.filter(s => s !== "Any");
+
+  const toggle = (item) => {
+    if (item === "No carbs") { onChange(["No carbs"]); return; }
+    const without = selectedItems.filter(s => s !== "No carbs" && s !== "Any");
+    const next = without.includes(item) ? without.filter(s => s !== item) : [...without, item];
+    onChange(next.length === 0 ? ["Any"] : next);
+  };
+
+  const currentItems = categories[activeTab]?.items || [];
+
+  return (
+    <div>
+      {/* Section label */}
+      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: "12px" }}>
+        <label style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "0.1em", color: COLORS.muted, textTransform: "uppercase", fontFamily: "'DM Sans', sans-serif" }}>
+          {icon} {label}
+        </label>
+        {selectedItems.length > 0 && (
+          <button onClick={() => onChange(["Any"])} style={{ background: "none", border: "none", cursor: "pointer", fontSize: "11px", color: COLORS.muted, fontFamily: "'DM Sans', sans-serif", textDecoration: "underline" }}>
+            Clear
+          </button>
+        )}
+      </div>
+
+      {/* Category tabs */}
+      <div style={{ display: "flex", gap: "6px", overflowX: "auto", paddingBottom: "14px" }}>
+        {catNames.map(cat => {
+          const isActive = activeTab === cat;
+          const { emoji } = categories[cat];
+          return (
+            <button key={cat} onClick={() => setActiveTab(cat)} style={{
+              padding: "10px 12px", borderRadius: "14px", flexShrink: 0,
+              border: `1.5px solid ${isActive ? "transparent" : COLORS.border}`,
+              background: isActive ? COLORS.dark : COLORS.card,
+              color: isActive ? COLORS.cream : COLORS.muted,
+              fontFamily: "'DM Sans', sans-serif",
+              fontWeight: isActive ? "700" : "500", cursor: "pointer",
+              display: "flex", flexDirection: "column", alignItems: "center", gap: "3px",
+              transition: "all 0.15s ease",
+              minWidth: "60px",
+            }}>
+              <span style={{ fontSize: "18px" }}>{emoji}</span>
+              <span style={{ fontSize: "10px", letterSpacing: "0.02em", textAlign: "center", lineHeight: 1.2 }}>{cat}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Item chips — subordinate style inside bordered container */}
+      <div style={{ padding: "14px", borderRadius: "16px", border: `1.5px solid ${COLORS.border}`, background: COLORS.cream }}>
+        <div style={{ fontSize: "10px", fontWeight: "700", letterSpacing: "0.1em", color: COLORS.muted, textTransform: "uppercase", fontFamily: "'DM Sans', sans-serif", marginBottom: "10px" }}>
+          {activeTab}
+        </div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "7px" }}>
+          {currentItems.map(item => {
+            const isSelected = selectedItems.includes(item);
+            return (
+              <button key={item} onClick={() => toggle(item)} style={{
+                padding: "6px 12px", borderRadius: "100px",
+                border: `1.5px solid ${isSelected ? "transparent" : COLORS.border}`,
+                background: isSelected ? COLORS.lime : "transparent",
+                color: COLORS.dark,
+                fontSize: "12px", fontFamily: "'DM Sans', sans-serif",
+                fontWeight: isSelected ? "700" : "400",
+                cursor: "pointer", transition: "all 0.12s ease",
+              }}>
+                {item}
+              </button>
+            );
+          })}
+        </div>
+        <TypeAheadInput
+          placeholder={`Other ${activeTab.toLowerCase()}...`}
+          selectedItems={selectedItems}
+          onAdd={(v) => { const without = selectedItems.filter(s => s !== "Any" && s !== "No carbs"); onChange([...without, v]); }}
+        />
+      </div>
+
+      {/* Selected summary */}
+      {selectedItems.length > 0 && (
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginTop: "10px" }}>
+          {selectedItems.map(item => (
+            <button key={item} onClick={() => toggle(item)} style={{
+              padding: "5px 11px", borderRadius: "100px", border: "none",
+              background: COLORS.dark, color: COLORS.cream,
+              fontSize: "12px", fontFamily: "'DM Sans', sans-serif",
+              fontWeight: "600", cursor: "pointer",
+              display: "flex", alignItems: "center", gap: "5px",
+            }}>
+              {item} <span style={{ opacity: 0.5, fontSize: "10px" }}>✕</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── VEG SELECTOR ─────────────────────────────────────────────────────────────
+function VegSelector({ season, onSeasonChange, selected, onChange }) {
+  const [activeTab, setActiveTab] = useState("All year");
+  const selectedItems = selected.filter(s => s !== "Any");
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    if (tab !== "All year") onSeasonChange(tab);
+  };
+
+  const toggleVeg = (v) => {
+    const next = selectedItems.includes(v)
+      ? selectedItems.filter(s => s !== v)
+      : [...selectedItems, v];
+    onChange(next.length === 0 ? ["Any"] : next);
+  };
+
+  // All year first, then seasons
+  const tabs = ["All year", ...SEASONS];
+  const currentVeg = SEASONAL_VEG[activeTab] || [];
+
+  return (
+    <div>
+      {/* Section label */}
+      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: "12px" }}>
+        <label style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "0.1em", color: COLORS.muted, textTransform: "uppercase", fontFamily: "'DM Sans', sans-serif" }}>
+          🥦 Vegetables
+        </label>
+        {selectedItems.length > 0 && (
+          <button onClick={() => onChange(["Any"])} style={{ background: "none", border: "none", cursor: "pointer", fontSize: "11px", color: COLORS.muted, fontFamily: "'DM Sans', sans-serif", textDecoration: "underline" }}>
+            Clear
+          </button>
+        )}
+      </div>
+
+      {/* Season tabs — styled as category headers, larger and more prominent */}
+      <div style={{ display: "flex", gap: "6px", overflowX: "auto", paddingBottom: "14px" }}>
+        {tabs.map(tab => {
+          const isActive = activeTab === tab;
+          const emoji = tab === "All year" ? "🌿" : SEASON_EMOJI[tab];
+          return (
+            <button key={tab} onClick={() => handleTabChange(tab)} style={{
+              padding: "10px 16px", borderRadius: "14px", flexShrink: 0,
+              border: `1.5px solid ${isActive ? "transparent" : COLORS.border}`,
+              background: isActive ? COLORS.dark : COLORS.card,
+              color: isActive ? COLORS.cream : COLORS.muted,
+              fontFamily: "'DM Sans', sans-serif",
+              fontWeight: isActive ? "700" : "500", cursor: "pointer",
+              display: "flex", flexDirection: "column", alignItems: "center", gap: "3px",
+              transition: "all 0.15s ease",
+              minWidth: "64px",
+            }}>
+              <span style={{ fontSize: "18px" }}>{emoji}</span>
+              <span style={{ fontSize: "11px", letterSpacing: "0.03em" }}>{tab}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Veg chips — smaller, subordinate style to show they belong to the season above */}
+      <div style={{ padding: "14px", borderRadius: "16px", border: `1.5px solid ${COLORS.border}`, background: COLORS.cream }}>
+        <div style={{ fontSize: "10px", fontWeight: "700", letterSpacing: "0.1em", color: COLORS.muted, textTransform: "uppercase", fontFamily: "'DM Sans', sans-serif", marginBottom: "10px" }}>
+          {activeTab === "All year" ? "Available any time" : `In season · ${activeTab}`}
+        </div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "7px" }}>
+          {currentVeg.map(v => {
+            const isSelected = selectedItems.includes(v);
+            return (
+              <button key={v} onClick={() => toggleVeg(v)} style={{
+                padding: "6px 12px", borderRadius: "100px",
+                border: `1.5px solid ${isSelected ? "transparent" : COLORS.border}`,
+                background: isSelected ? COLORS.lime : "transparent",
+                color: COLORS.dark,
+                fontSize: "12px", fontFamily: "'DM Sans', sans-serif",
+                fontWeight: isSelected ? "700" : "400",
+                cursor: "pointer", transition: "all 0.12s ease",
+              }}>
+                {v}
+              </button>
+            );
+          })}
+        </div>
+        <TypeAheadInput
+          placeholder="Other vegetable..."
+          selectedItems={selectedItems}
+          onAdd={(v) => { const without = selectedItems.filter(s => s !== "Any"); onChange([...without, v]); }}
+        />
+      </div>
+
+      {/* Selected summary */}
+      {selectedItems.length > 0 && (
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginTop: "10px" }}>
+          {selectedItems.map(item => (
+            <button key={item} onClick={() => toggleVeg(item)} style={{
+              padding: "5px 11px", borderRadius: "100px", border: "none",
+              background: COLORS.dark, color: COLORS.cream,
+              fontSize: "12px", fontFamily: "'DM Sans', sans-serif",
+              fontWeight: "600", cursor: "pointer",
+              display: "flex", alignItems: "center", gap: "5px",
+            }}>
+              {item} <span style={{ opacity: 0.5, fontSize: "10px" }}>✕</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── SCREEN 1: INPUT ──────────────────────────────────────────────────────────
 function InputScreen({ onGenerate, isLoading }) {
   const [season, setSeason]     = useState(CURRENT_SEASON);
@@ -526,6 +650,9 @@ function InputScreen({ onGenerate, isLoading }) {
   const [calories, setCalories] = useState(500);
   const [macros, setMacros]     = useState(DEFAULT_MACROS);
   const [people, setPeople]     = useState(2);
+  const [freeText, setFreeText] = useState("");
+  const [freeTextOpen, setFreeTextOpen] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
 
   // Reset veg selection when season changes
   const handleSeasonChange = (s) => {
@@ -563,26 +690,16 @@ function InputScreen({ onGenerate, isLoading }) {
 
       <div style={{ display: "flex", flexDirection: "column", gap: "28px" }}>
 
-        {/* Season selector */}
+        {/* Servings — top field, always visible */}
         <div style={{ padding: "0 24px" }}>
           <div style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "0.12em", color: COLORS.dark, textTransform: "uppercase", fontFamily: "'DM Sans', sans-serif", borderTop: `1px solid ${COLORS.border}`, paddingTop: "20px", marginBottom: "16px" }}>
-            🗓 Season
+            👤 How many servings?
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: "8px" }}>
-            {SEASONS.map(s => (
-              <button key={s} onClick={() => handleSeasonChange(s)} style={{
-                padding: "12px 4px", borderRadius: "16px", border: `1.5px solid ${season === s ? "transparent" : COLORS.border}`,
-                background: season === s ? COLORS.dark : "transparent",
-                color: season === s ? COLORS.cream : COLORS.dark,
-                fontSize: "12px", fontFamily: "'DM Sans', sans-serif",
-                fontWeight: season === s ? "700" : "400", cursor: "pointer",
-                display: "flex", flexDirection: "column", alignItems: "center", gap: "4px",
-                transition: "all 0.15s ease",
-              }}>
-                <span style={{ fontSize: "20px" }}>{SEASON_EMOJI[s]}</span>
-                <span>{s}</span>
-              </button>
-            ))}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <Stepper value={people} onChange={setPeople} />
+            <span style={{ fontSize: "13px", color: COLORS.muted, fontFamily: "'DM Sans', sans-serif" }}>
+              {people === 1 ? "Just me" : people === 2 ? "Two of us" : `${people} people`}
+            </span>
           </div>
         </div>
 
@@ -592,21 +709,17 @@ function InputScreen({ onGenerate, isLoading }) {
             What's in the fridge?
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: "28px" }}>
-            <ProgressiveDisclosureSelector
-              icon="🥩" label="Protein" sublabel="pick a category first"
+            <CategoryChipSelector
+              icon="🥩" label="Protein"
               categories={PROTEIN_CATEGORIES}
               selected={proteins} onChange={setProteins}
             />
-            <ProgressiveDisclosureSelector
-              icon="🌾" label="Carbs" sublabel="pick a category first"
+            <CategoryChipSelector
+              icon="🌾" label="Carbs"
               categories={CARB_CATEGORIES}
               selected={carbs} onChange={setCarbs}
             />
-            <ProgressiveDisclosureSelector
-              icon="🥦" label="Vegetables" sublabel={`${season} in NZ`}
-              categories={SEASONAL_VEG_CATEGORIES[season]}
-              selected={veg} onChange={setVeg}
-            />
+            <VegSelector season={season} onSeasonChange={handleSeasonChange} selected={veg} onChange={setVeg} />
           </div>
         </div>
 
@@ -633,38 +746,87 @@ function InputScreen({ onGenerate, isLoading }) {
           </div>
         )}
 
-        {/* Tonight's details */}
+        {/* Free text — anything else */}
         <div style={{ padding: "0 24px" }}>
-          <div style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "0.12em", color: COLORS.dark, textTransform: "uppercase", fontFamily: "'DM Sans', sans-serif", borderTop: `1px solid ${COLORS.border}`, paddingTop: "20px", marginBottom: "24px" }}>
-            Tonight's details
+          <div style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "0.12em", color: COLORS.dark, textTransform: "uppercase", fontFamily: "'DM Sans', sans-serif", borderTop: `1px solid ${COLORS.border}`, paddingTop: "20px", marginBottom: "12px" }}>
+            Anything else?
           </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: "28px" }}>
-            <div>
-              <label style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "0.1em", color: COLORS.muted, textTransform: "uppercase", display: "block", marginBottom: "14px", fontFamily: "'DM Sans', sans-serif" }}>
-                👤 Servings
-              </label>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <Stepper value={people} onChange={setPeople} />
-                <span style={{ fontSize: "13px", color: COLORS.muted, fontFamily: "'DM Sans', sans-serif" }}>
-                  ~{(calories * people).toLocaleString()} kcal total
+          {freeTextOpen ? (
+            <div style={{ display: "flex", gap: "8px", alignItems: "flex-start" }}>
+              <textarea
+                autoFocus
+                value={freeText}
+                onChange={e => setFreeText(e.target.value)}
+                placeholder="e.g. nothing spicy, use up leftover coconut milk, quick and easy..."
+                rows={3}
+                style={{
+                  flex: 1, padding: "12px 14px", borderRadius: "16px",
+                  border: `1.5px solid ${COLORS.dark}`, background: COLORS.cream,
+                  fontSize: "13px", fontFamily: "'DM Sans', sans-serif",
+                  color: COLORS.dark, resize: "none", outline: "none", lineHeight: 1.5,
+                }}
+              />
+              <button
+                onClick={() => { setFreeText(""); setFreeTextOpen(false); }}
+                style={{ width: 32, height: 32, borderRadius: "50%", background: "transparent", border: `1.5px solid ${COLORS.border}`, color: COLORS.muted, fontSize: "13px", cursor: "pointer", flexShrink: 0, marginTop: "4px" }}
+              >✕</button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setFreeTextOpen(true)}
+              style={{
+                width: "100%", padding: "12px 16px", borderRadius: "100px",
+                border: `1.5px dashed ${COLORS.border}`, background: "transparent",
+                color: COLORS.muted, fontSize: "13px", fontFamily: "'DM Sans', sans-serif",
+                cursor: "pointer", textAlign: "left",
+              }}
+            >
+              + e.g. nothing spicy, use up leftovers...
+            </button>
+          )}
+        </div>
+
+        {/* Calories + Macros — optional accordion */}
+        <div style={{ padding: "0 24px" }}>
+          <button
+            onClick={() => setDetailsOpen(o => !o)}
+            style={{
+              width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
+              background: "none", border: "none", cursor: "pointer",
+              borderTop: `1px solid ${COLORS.border}`, paddingTop: "20px", paddingBottom: detailsOpen ? "20px" : "0",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <span style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "0.12em", color: COLORS.dark, textTransform: "uppercase", fontFamily: "'DM Sans', sans-serif" }}>
+                🔥 Calories & macros
+              </span>
+              {!detailsOpen && (
+                <span style={{ fontSize: "12px", color: COLORS.muted, fontFamily: "'DM Sans', sans-serif" }}>
+                  {calories} kcal · {macros.protein}P / {macros.carbs}C / {macros.fat}F
                 </span>
+              )}
+            </div>
+            <span style={{ fontSize: "12px", color: COLORS.muted, transition: "transform 0.2s", display: "inline-block", transform: detailsOpen ? "rotate(180deg)" : "rotate(0deg)" }}>▼</span>
+          </button>
+
+          {detailsOpen && (
+            <div style={{ display: "flex", flexDirection: "column", gap: "28px", paddingBottom: "8px" }}>
+              <div>
+                <label style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "0.1em", color: COLORS.muted, textTransform: "uppercase", display: "block", marginBottom: "14px", fontFamily: "'DM Sans', sans-serif" }}>
+                  Calories per serving
+                </label>
+                <CalorieSlider value={calories} onChange={setCalories} />
               </div>
+              <MacroSelector value={macros} onChange={setMacros} />
             </div>
-            <div>
-              <label style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "0.1em", color: COLORS.muted, textTransform: "uppercase", display: "block", marginBottom: "14px", fontFamily: "'DM Sans', sans-serif" }}>
-                🔥 Calories per serving
-              </label>
-              <CalorieSlider value={calories} onChange={setCalories} />
-            </div>
-            <MacroSelector value={macros} onChange={setMacros} />
-          </div>
+          )}
         </div>
       </div>
 
       {/* Generate button */}
       <div style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "390px", padding: "16px 24px 32px", background: `linear-gradient(transparent, ${COLORS.cream} 40%)`, zIndex: 10 }}>
         <button
-          onClick={() => onGenerate({ season, proteins, carbs, veg, calories, macros, people })}
+          onClick={() => onGenerate({ season, proteins, carbs, veg, calories, macros, people, freeText })}
           disabled={isLoading}
           style={{
             width: "100%", padding: "18px", borderRadius: "100px", border: "none",
@@ -711,6 +873,11 @@ function MealCard({ meal, featured, onSelect }) {
             <div style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: "21px", fontWeight: "400", color: COLORS.dark, marginBottom: "6px" }}>
               {meal.name}
             </div>
+            {meal.description && (
+              <div style={{ fontSize: "13px", color: COLORS.dark, fontFamily: "'DM Sans', sans-serif", lineHeight: 1.45, marginBottom: "8px", opacity: 0.75 }}>
+                {meal.description}
+              </div>
+            )}
             <div style={{ fontSize: "13px", color: COLORS.muted, fontFamily: "'DM Sans', sans-serif", display: "flex", gap: "10px", marginBottom: meal.macros ? "12px" : "0" }}>
               <span>⏱ {meal.time}</span><span>· {meal.difficulty}</span><span>· 🔥 {meal.calories} kcal</span>
             </div>
@@ -737,7 +904,7 @@ function ResultsScreen({ prefs, meals, onSelect, onBack, onRegenerate, isLoading
   ].filter(Boolean);
 
   return (
-    <div style={{ paddingBottom: "260px" }}>
+    <div style={{ paddingBottom: "40px" }}>
       <div style={{ padding: "56px 24px 20px" }}>
         <button onClick={onBack} style={{ background: "none", border: "none", cursor: "pointer", padding: "0 0 12px 0", color: COLORS.muted, fontSize: "14px", fontFamily: "'DM Sans', sans-serif" }}>
           ← Back
@@ -755,42 +922,39 @@ function ResultsScreen({ prefs, meals, onSelect, onBack, onRegenerate, isLoading
         {meals.map((meal, i) => <MealCard key={meal.id} meal={meal} featured={i === 0} onSelect={onSelect} />)}
       </div>
 
-      {/* Cuisine + Regenerate — fixed at bottom */}
-      <div style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "390px", padding: "16px 24px 32px", background: `linear-gradient(transparent, ${COLORS.cream} 30%)` }}>
-
-        {/* Cuisine label */}
-        <div style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "0.1em", color: COLORS.muted, textTransform: "uppercase", fontFamily: "'DM Sans', sans-serif", marginBottom: "10px" }}>
-          🍽 Try a cuisine
+      {/* Cuisine + Regenerate — in scroll, below cards */}
+      <div style={{ padding: "24px 24px 0" }}>
+        <div style={{ borderTop: `1px solid ${COLORS.border}`, paddingTop: "20px" }}>
+          <div style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "0.1em", color: COLORS.muted, textTransform: "uppercase", fontFamily: "'DM Sans', sans-serif", marginBottom: "12px" }}>
+            🍽 Try a cuisine
+          </div>
+          {/* Cuisine chips — wrapping */}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "16px" }}>
+            {CUISINE_CHIPS.map(c => (
+              <Chip key={c} label={c} selected={cuisine === c} onClick={() => setCuisine(c)} accent />
+            ))}
+          </div>
+          {/* Regenerate button */}
+          <button
+            onClick={() => onRegenerate(cuisine)}
+            disabled={isLoading}
+            style={{
+              width: "100%", padding: "16px", borderRadius: "100px",
+              border: `1.5px solid ${cuisine !== "Any" ? "transparent" : COLORS.border}`,
+              background: isLoading ? COLORS.muted : cuisine !== "Any" ? COLORS.dark : "transparent",
+              color: isLoading ? COLORS.cream : cuisine !== "Any" ? COLORS.cream : COLORS.dark,
+              fontSize: "15px", fontWeight: "600", fontFamily: "'DM Sans', sans-serif",
+              cursor: isLoading ? "not-allowed" : "pointer",
+              transition: "all 0.2s ease",
+              display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
+            }}
+          >
+            {isLoading
+              ? <><span style={{ animation: "spin 1s linear infinite", display: "inline-block" }}>✦</span>Finding ideas...</>
+              : `↻ ${cuisine !== "Any" ? `Regenerate as ${cuisine}` : "Regenerate ideas"}`
+            }
+          </button>
         </div>
-
-        {/* Cuisine chips — wrapped, all visible */}
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "12px" }}>
-          {CUISINE_CHIPS.map(c => (
-            <Chip key={c} label={c} selected={cuisine === c} onClick={() => setCuisine(c)} accent />
-          ))}
-        </div>
-
-        {/* Regenerate button */}
-        <button
-          onClick={() => onRegenerate(cuisine)}
-          disabled={isLoading}
-          style={{
-            width: "100%", padding: "16px", borderRadius: "100px",
-            border: `1.5px solid ${cuisine !== "Any" ? "transparent" : COLORS.border}`,
-            background: isLoading ? COLORS.muted : cuisine !== "Any" ? COLORS.dark : "transparent",
-            color: isLoading ? COLORS.cream : cuisine !== "Any" ? COLORS.cream : COLORS.dark,
-            fontSize: "15px", fontWeight: "600",
-            fontFamily: "'DM Sans', sans-serif",
-            cursor: isLoading ? "not-allowed" : "pointer",
-            transition: "all 0.2s ease",
-            display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
-          }}
-        >
-          {isLoading
-            ? <><span style={{ animation: "spin 1s linear infinite", display: "inline-block" }}>✦</span>Finding ideas...</>
-            : `↻ ${cuisine !== "Any" ? `Regenerate as ${cuisine}` : "Regenerate ideas"}`
-          }
-        </button>
       </div>
     </div>
   );
@@ -798,7 +962,10 @@ function ResultsScreen({ prefs, meals, onSelect, onBack, onRegenerate, isLoading
 
 // ─── SCREEN 3: RECIPE ─────────────────────────────────────────────────────────
 function RecipeScreen({ meal, onBack }) {
-  const allIngredients              = [...(meal.ingredients || []), ...(meal.pantryUsed || [])];
+  const heroIngredients             = meal.ingredients || [];
+  const pantryIngredients           = meal.pantryUsed || [];
+  const allIngredients              = [...heroIngredients, ...pantryIngredients];
+  const pantrySet                   = new Set(pantryIngredients);
   const [ingredients, setIngredients] = useState(allIngredients);
   const [swappingIndex, setSwappingIndex] = useState(null);
   const [swapVal, setSwapVal]       = useState("");
@@ -1020,7 +1187,7 @@ export default function App() {
     setApiError(null);
     setIsLoading(true);
     try {
-      const response = await fetch("/api/generate", {
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
