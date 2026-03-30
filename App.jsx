@@ -1018,7 +1018,7 @@ Respond ONLY with a JSON array of steps, e.g. ["Step one.", "Step two.", "Step t
 No explanation, no markdown.`;
 
     try {
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
+      const response = await fetch("https:///api/generate/v1/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -1187,7 +1187,7 @@ export default function App() {
     setApiError(null);
     setIsLoading(true);
     try {
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
+      const response = await fetch("https:///api/generate/v1/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
