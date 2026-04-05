@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 // ─── DESIGN TOKENS (exact Figma variables) ───────────────────────────────────
 const C = {
@@ -686,7 +686,7 @@ function AddContext({ value: controlledValue, onChange, onAdd, placeholder="Any 
   const value        = isControlled ? controlledValue : internalValue;
 
   // Auto-resize textarea height to fit content
-  React.useEffect(() => {
+  useEffect(() => {
     const el = textareaRef.current;
     if (!el) return;
     if (!value) { el.style.height = "20px"; }
