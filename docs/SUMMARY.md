@@ -14,7 +14,7 @@ wfdt.vercel.app (or your current URL)
 - No database, no auth — stateless prototype
 
 ## Repo structure
-- src/App.jsx — entire frontend
+- App.jsx — entire frontend
 - api/generate.js — serverless API route
 - docs/SUMMARY.md — this file
 - docs/DESIGN_SYSTEM.md — tokens, components, decisions
