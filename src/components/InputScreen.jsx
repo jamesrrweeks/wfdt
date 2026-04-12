@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { C, SPACE, T, F, SHADOW } from "../tokens.js";
-import { CURRENT_SEASON, PROTEIN_CATEGORIES, CARB_CATEGORIES, DEFAULT_MACROS } from "../data.js";
+import { CURRENT_SEASON, PROTEIN_CATEGORIES, CARB_CATEGORIES, DEFAULT_MACROS } from "../data.jsx";
 import CategoryChipSelector from "./CategoryChipSelector.jsx";
 import VegSelector from "./VegSelector.jsx";
 import MacroSelector, { CalorieSlider } from "./MacroSelector.jsx";
