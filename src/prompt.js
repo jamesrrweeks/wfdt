@@ -13,7 +13,7 @@ Each meal must include: name, emoji, description (1 sentence), time, difficulty 
 Preferences:
 - Servings: ${people}
 - Protein: ${proteinList}
-- Carbs: ${carbList}  
+- Carbs: ${carbList}
 - Vegetables: ${vegList} (${season} season)
 - Target calories per serving: ${calories} kcal
 - Macro split: ${macros?.protein}% protein, ${macros?.carbs}% carbs, ${macros?.fat}% fat
