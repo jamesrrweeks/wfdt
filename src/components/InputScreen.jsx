@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { C, SPACE, T, F, SHADOW } from "../tokens.js";
+import { C, SPACE, T, F } from "../tokens.js";
 import { CURRENT_SEASON, PROTEIN_CATEGORIES, CARB_CATEGORIES, DEFAULT_MACROS } from "../data.jsx";
 import CategoryChipSelector from "./CategoryChipSelector.jsx";
 import VegSelector from "./VegSelector.jsx";
@@ -31,14 +31,14 @@ export default function InputScreen({ onGenerate, isLoading, onShowDS }) {
       {/* Header */}
       <div style={{ padding:`${SPACE.xxl}px ${SPACE.s}px ${SPACE.m}px` }}>
         <div style={{ display:"flex", alignItems:"center", gap:`${SPACE.xs}px`, marginBottom:`${SPACE.s}px`, flexWrap:"wrap" }}>
-          <div style={{ display:"inline-flex", alignItems:"center", background:C.lime, borderRadius:"100px", padding:"5px 14px" }}>
-            <span style={{ fontSize:"12px", fontWeight:"700", color:C.dark, fontFamily:F }}>✦ AI powered meal generator</span>
+          <div style={{ display:"inline-flex", alignItems:"center", background:C.primary, borderRadius:"100px", padding:"5px 14px" }}>
+            <span style={{ fontSize:"12px", fontWeight:"700", color:C.textStrong, fontFamily:F }}>✦ AI powered meal generator</span>
           </div>
-          <button onClick={onShowDS} style={{ display:"inline-flex", alignItems:"center", background:"transparent", border:`1px solid ${C.border}`, borderRadius:"100px", padding:"5px 14px", cursor:"pointer" }}>
-            <span style={{ fontSize:"12px", fontWeight:"700", color:C.dark, fontFamily:F }}>⬡ Design system</span>
+          <button onClick={onShowDS} style={{ display:"inline-flex", alignItems:"center", background:"transparent", border:`1px solid ${C.strokeStrong}`, borderRadius:"100px", padding:"5px 14px", cursor:"pointer" }}>
+            <span style={{ fontSize:"12px", fontWeight:"700", color:C.textStrong, fontFamily:F }}>⬡ Design system</span>
           </button>
         </div>
-        <h1 style={{ ...T.h1, color:C.dark, margin:0 }}>
+        <h1 style={{ ...T.h1, color:C.textStrong, margin:0 }}>
           What's for<br/>dinner tonight?
         </h1>
       </div>
@@ -75,11 +75,11 @@ export default function InputScreen({ onGenerate, isLoading, onShowDS }) {
         <div style={{ padding:`0 ${SPACE.s}px` }}>
           <button onClick={()=>setDetailsOpen(o=>!o)} style={{
             width:"100%", display:"flex", alignItems:"center", justifyContent:"space-between",
-            background:"none", border:"none", cursor:"pointer", borderTop:`1px solid ${C.border}`,
+            background:"none", border:"none", cursor:"pointer", borderTop:`1px solid ${C.strokeStrong}`,
             paddingTop:"20px", paddingBottom: detailsOpen?"16px":"20px",
           }}>
             <div style={{ display:"flex", alignItems:"center", gap:"10px" }}>
-              <span style={{ fontSize:"15px", fontWeight:"700", color:C.dark, fontFamily:F }}>Calorie and macro details</span>
+              <span style={{ fontSize:"15px", fontWeight:"700", color:C.textStrong, fontFamily:F }}>Calorie and macro details</span>
               {!detailsOpen && <span style={{ fontSize:"12px", color:C.muted, fontFamily:F }}>{calories} kcal · {macros.protein}P/{macros.carbs}C/{macros.fat}F</span>}
             </div>
             <span style={{ fontSize:"12px", color:C.muted, transition:"transform 0.2s", display:"inline-block", transform:detailsOpen?"rotate(180deg)":"rotate(0deg)" }}>▼</span>
@@ -103,7 +103,7 @@ export default function InputScreen({ onGenerate, isLoading, onShowDS }) {
       </div>
 
       {/* Sticky footer */}
-      <div style={{ position:"fixed", bottom:0, left:"50%", transform:"translateX(-50%)", width:"390px", padding:"12px 20px 32px", background:`linear-gradient(transparent, ${C.bg} 30%)`, zIndex:10 }}>
+      <div style={{ position:"fixed", bottom:0, left:"50%", transform:"translateX(-50%)", width:"390px", padding:"12px 20px 32px", background:`linear-gradient(transparent, ${C.strokeWeak} 30%)`, zIndex:10 }}>
         {(proteins.filter(s=>s!=="Any").length>0 || carbs.filter(s=>s!=="Any").length>0 || veg.filter(s=>s!=="Any").length>0 || freeNotes.length>0) && (
           <div style={{ display:"flex", flexWrap:"wrap", gap:`${SPACE.xs}px`, marginBottom:"10px" }}>
             {proteins.filter(s=>s!=="Any").map(item=>(
@@ -126,7 +126,7 @@ export default function InputScreen({ onGenerate, isLoading, onShowDS }) {
             ))}
             {freeNotes.map((note,i)=>(
               <button key={`n-${i}`} onClick={()=>removeFreeNote(i)}
-                style={{ padding:"5px 11px", borderRadius:"100px", border:`1px solid ${C.border}`, background:"transparent", color:C.dark, fontSize:"12px", fontFamily:F, fontWeight:"600", cursor:"pointer", display:"flex", alignItems:"center", gap:"5px", fontStyle:"italic" }}>
+                style={{ padding:"5px 11px", borderRadius:"100px", border:`1px solid ${C.strokeStrong}`, background:"transparent", color:C.textStrong, fontSize:"12px", fontFamily:F, fontWeight:"600", cursor:"pointer", display:"flex", alignItems:"center", gap:"5px", fontStyle:"italic" }}>
                 {note.length>24?note.slice(0,24)+"…":note} <span style={{ opacity:0.5, fontSize:"10px" }}>✕</span>
               </button>
             ))}
@@ -135,8 +135,8 @@ export default function InputScreen({ onGenerate, isLoading, onShowDS }) {
         <button
           onClick={()=>onGenerate({season,proteins,carbs,veg,calories,macros,people,freeText:freeNotes.join(". ")})}
           disabled={isLoading}
-          style={{ width:"100%", padding:"18px", borderRadius:"32px", border:"none", background:isLoading?C.strokeStrong:C.lime, color:C.dark, fontSize:"17px", fontFamily:F, fontWeight:"700", cursor:isLoading?"not-allowed":"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:"10px" }}>
-          {isLoading ? <><span style={{ width:18, height:18, border:`3px solid ${C.dark}`, borderTopColor:"transparent", borderRadius:"50%", display:"inline-block", animation:"spin 0.8s linear infinite" }}/> Finding ideas…</> : "✦ Generate meal"}
+          style={{ width:"100%", padding:"18px", borderRadius:"32px", border:"none", background:isLoading?C.strokeStrong:C.primary, color:C.textStrong, fontSize:"17px", fontFamily:F, fontWeight:"700", cursor:isLoading?"not-allowed":"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:"10px" }}>
+          {isLoading ? <><span style={{ width:18, height:18, border:`3px solid ${C.textStrong}`, borderTopColor:"transparent", borderRadius:"50%", display:"inline-block", animation:"spin 0.8s linear infinite" }}/> Finding ideas…</> : "✦ Generate meal"}
         </button>
       </div>
     </div>
