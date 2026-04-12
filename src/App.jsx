@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { C, F } from "./tokens.js";
 import { buildPrompt } from "./prompt.js";
-import { MOCK_MEALS } from "./data.js";
+import { MOCK_MEALS } from "./data.jsx";
 import InputScreen from "./components/InputScreen.jsx";
 import ResultsScreen from "./components/ResultsScreen.jsx";
 import RecipeScreen from "./components/RecipeScreen.jsx";
