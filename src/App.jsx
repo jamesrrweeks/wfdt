@@ -14,23 +14,25 @@ link.href = "https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital
 document.head.appendChild(link);
 
 const devMode = new URLSearchParams(window.location.search).has("dev");
-const [screen, setScreen]             = useState(devMode ? "recipe" : "input");
-const [prefs, setPrefs]               = useState(null);
-const [meals, setMeals]               = useState(null);
-const [selectedMeal, setSelectedMeal] = useState(devMode ? MOCK_MEALS[0] : null);
-const [isLoading, setIsLoading]       = useState(false);
-const [apiError, setApiError]         = useState(null);
+
+export default function App() {
+  const [screen, setScreen]             = useState(devMode ? "recipe" : "input");
+  const [prefs, setPrefs]               = useState(null);
+  const [meals, setMeals]               = useState(null);
+  const [selectedMeal, setSelectedMeal] = useState(devMode ? MOCK_MEALS[0] : null);
+  const [isLoading, setIsLoading]       = useState(false);
+  const [apiError, setApiError]         = useState(null);
 
   const handleGenerate = async (p) => {
     setPrefs(p); setApiError(null); setIsLoading(true);
     try {
       const r = await fetch("/api/generate", {
-  method:"POST",
-  headers:{
-    "Content-Type":"application/json",
-    "x-secret-token": import.meta.env.VITE_API_SECRET_TOKEN
-  },
-  body:JSON.stringify({
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json",
+          "x-secret-token": import.meta.env.VITE_API_SECRET_TOKEN
+        },
+        body:JSON.stringify({
           model:"claude-sonnet-4-20250514",
           max_tokens:1500,
           messages:[{ role:"user", content:buildPrompt(p) }]
@@ -50,39 +52,3 @@ const [apiError, setApiError]         = useState(null);
   };
 
   return (
-    <div style={{ background:C.strokeWeak, minHeight:"100vh", display:"flex", justifyContent:"center", fontFamily:F }}>
-      <div style={{ width:"390px", minHeight:"100vh", background:C.strokeWeak, fontFamily:F }}>
-        {screen==="input" && (
-          <InputScreen
-            onGenerate={handleGenerate}
-            isLoading={isLoading}
-            onShowDS={()=>setScreen("ds")}
-          />
-        )}
-        {screen==="ds" && (
-          <DesignSystem onBack={()=>setScreen("input")}/>
-        )}
-        {screen==="results" && (
-          <>
-            {apiError && (
-              <div style={{ background:"#FFF0ED", borderBottom:"1px solid #F5C2B8", padding:"10px 20px", fontSize:"12px", color:C.red, fontFamily:F }}>
-                ⚠ {apiError}
-              </div>
-            )}
-            <ResultsScreen
-              prefs={prefs}
-              meals={meals}
-              isLoading={isLoading}
-              onSelect={m=>{ setSelectedMeal(m); setScreen("recipe"); }}
-              onBack={()=>setScreen("input")}
-              onRegenerate={cuisine=>handleGenerate({...prefs, cuisine})}
-            />
-          </>
-        )}
-        {screen==="recipe" && (
-          <RecipeScreen meal={selectedMeal} onBack={()=>setScreen("results")}/>
-        )}
-      </div>
-    </div>
-  );
-}
