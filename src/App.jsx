@@ -25,9 +25,12 @@ export default function App() {
     setPrefs(p); setApiError(null); setIsLoading(true);
     try {
       const r = await fetch("/api/generate", {
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({
+  method:"POST",
+  headers:{
+    "Content-Type":"application/json",
+    "x-secret-token": import.meta.env.VITE_API_SECRET_TOKEN
+  },
+  body:JSON.stringify({
           model:"claude-sonnet-4-20250514",
           max_tokens:1500,
           messages:[{ role:"user", content:buildPrompt(p) }]
