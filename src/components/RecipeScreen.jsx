@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { C, SPACE, T, F } from "../tokens.js";
 import MacroBar from "./MacroBar.jsx";
+import Chip from "./Chip.jsx";
 
 export default function RecipeScreen({ meal, onBack }) {
   const all = [...(meal.ingredients||[]),...(meal.pantryUsed||[])];
@@ -11,6 +12,7 @@ export default function RecipeScreen({ meal, onBack }) {
   const [regenLoading, setRegenLoading] = useState(false);
   const [hasEdits, setHasEdits]       = useState(false);
   const [copied, setCopied]           = useState(false);
+  const [saved, setSaved]             = useState(false);
 
   const removeIng = (i) => { setIngredients(p=>p.filter((_,idx)=>idx!==i)); setHasEdits(true); if(swapIdx===i)setSwapIdx(null); };
   const startSwap = (i) => { setSwapVal(ingredients[i]); setSwapIdx(i); };
@@ -36,12 +38,15 @@ export default function RecipeScreen({ meal, onBack }) {
       <div style={{ background:C.strokeWeak, padding:`${SPACE.xxl}px ${SPACE.s}px ${SPACE.m}px`, borderBottom:`1px solid ${C.strokeStrong}` }}>
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"20px" }}>
           <button onClick={onBack} style={{ background:"none", border:"none", cursor:"pointer", color:C.muted, fontSize:"14px", fontFamily:F }}>← Back</button>
-          <button onClick={exportIngredients} style={{
-            display:"flex", alignItems:"center", gap:`${SPACE.xs}px`, padding:"7px 14px", borderRadius:"100px", cursor:"pointer",
-            border:`1.5px solid ${copied?"transparent":C.strokeStrong}`,
-            background:copied?C.primary:"transparent",
-            color:C.textStrong, fontSize:"12px", fontFamily:F, fontWeight:"600", transition:"all 0.2s",
-          }}>{copied?"✓ Copied!":"↑ Export ingredients"}</button>
+          <div style={{ display:"flex", gap:"8px", alignItems:"center" }}>
+            <Chip label={saved?"Saved ✓":"Save"} selected={saved} onClick={()=>setSaved(s=>!s)}/>
+            <button onClick={exportIngredients} style={{
+              display:"flex", alignItems:"center", gap:`${SPACE.xs}px`, padding:"7px 14px", borderRadius:"100px", cursor:"pointer",
+              border:`1.5px solid ${copied?"transparent":C.strokeStrong}`,
+              background:copied?C.primary:"transparent",
+              color:C.textStrong, fontSize:"12px", fontFamily:F, fontWeight:"600", transition:"all 0.2s",
+            }}>{copied?"✓ Copied!":"↑ Export ingredients"}</button>
+          </div>
         </div>
         <div style={{ fontSize:"44px", marginBottom:"14px" }}>{meal.emoji}</div>
         <h2 style={{ ...T.h2, color:C.textStrong, margin:"0 0 10px" }}>{meal.name}</h2>
@@ -53,6 +58,7 @@ export default function RecipeScreen({ meal, onBack }) {
         {meal.macros && <div style={{ marginTop:"14px" }}><MacroBar protein={meal.macros.protein} carbs={meal.macros.carbs} fat={meal.macros.fat} size="lg" calories={meal.calories}/></div>}
       </div>
 
+      {/* everything below here is unchanged */}
       <div style={{ padding:"28px 20px", display:"flex", flexDirection:"column", gap:`${SPACE.m}px` }}>
         <div>
           <div style={{ display:"flex", justifyContent:"space-between", alignItems:"baseline", marginBottom:"14px" }}>
