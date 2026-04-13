@@ -13,13 +13,13 @@ link.rel = "stylesheet";
 link.href = "https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=Gasoek+One&display=swap";
 document.head.appendChild(link);
 
-export default function App() {
-  const [screen, setScreen]             = useState("input");
-  const [prefs, setPrefs]               = useState(null);
-  const [meals, setMeals]               = useState(null);
-  const [selectedMeal, setSelectedMeal] = useState(null);
-  const [isLoading, setIsLoading]       = useState(false);
-  const [apiError, setApiError]         = useState(null);
+const devMode = new URLSearchParams(window.location.search).has("dev");
+const [screen, setScreen]             = useState(devMode ? "recipe" : "input");
+const [prefs, setPrefs]               = useState(null);
+const [meals, setMeals]               = useState(null);
+const [selectedMeal, setSelectedMeal] = useState(devMode ? MOCK_MEALS[0] : null);
+const [isLoading, setIsLoading]       = useState(false);
+const [apiError, setApiError]         = useState(null);
 
   const handleGenerate = async (p) => {
     setPrefs(p); setApiError(null); setIsLoading(true);
