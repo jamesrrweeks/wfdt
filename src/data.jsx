@@ -1,5 +1,4 @@
-import { ChickenIcon, VegeIcon, BeefIcon, SeafoodIcon, EmojiIcon } from "./icons.jsx";
-
+import { ChickenIcon, VegeIcon, BeefIcon, SeafoodIcon, RiceIcon, NoodlesIcon, BreadIcon, RootVegeIcon } from "./icons.jsx";
 export const SEASONS = ["Summer", "Autumn", "Winter", "Spring"];
 export const SEASON_EMOJI = { Summer:"☀️", Autumn:"🍂", Winter:"❄️", Spring:"🌸" };
 export const CURRENT_SEASON = "Autumn";
@@ -16,11 +15,10 @@ export const PROTEIN_CATEGORIES = {
 };
 
 export const CARB_CATEGORIES = {
-  "Pasta & Noodles": { icon: (active) => <EmojiIcon emoji="🍝" active={active}/>, items: ["Pasta","Spaghetti","Penne","Fettuccine","Gnocchi","Orzo","Noodles","Udon noodles","Soba noodles","Rice noodles","Glass noodles","Couscous","Polenta"] },
-  "Rice & Grains":   { icon: (active) => <EmojiIcon emoji="🍚" active={active}/>, items: ["Rice","Basmati rice","Jasmine rice","Brown rice","Arborio rice","Quinoa","Bulgur wheat","Pearl barley","Freekeh","Farro","Millet"] },
-  "Bread & Wraps":   { icon: (active) => <EmojiIcon emoji="🫓" active={active}/>, items: ["Sourdough","White bread","Wholegrain bread","Flatbread","Tortillas","Corn tortillas","Pita","Naan","Bao buns","Burger buns","Crumpets","English muffins"] },
-  "Potato & Root":   { icon: (active) => <EmojiIcon emoji="🥔" active={active}/>, items: ["Potatoes","Kumara","Sweet potato","Baby potatoes","Parsnip","Cassava","Taro","Yam"] },
-  "No carbs":        { icon: (active) => <EmojiIcon emoji="🚫" active={active}/>, items: ["No carbs"] },
+  "Pasta & Noodles": { icon: (active) => <NoodlesIcon active={active}/>, items: ["Pasta","Spaghetti","Penne","Fettuccine","Gnocchi","Orzo","Noodles","Udon noodles","Soba noodles","Rice noodles","Glass noodles","Couscous","Polenta"] },
+  "Rice & Grains":   { icon: (active) => <RiceIcon active={active}/>,    items: ["Rice","Basmati rice","Jasmine rice","Brown rice","Arborio rice","Quinoa","Bulgur wheat","Pearl barley","Freekeh","Farro","Millet"] },
+  "Bread & Wraps":   { icon: (active) => <BreadIcon active={active}/>,   items: ["Sourdough","White bread","Wholegrain bread","Flatbread","Tortillas","Corn tortillas","Pita","Naan","Bao buns","Burger buns","Crumpets","English muffins"] },
+  "Potato & Root":   { icon: (active) => <RootVegeIcon active={active}/>,items: ["Potatoes","Kumara","Sweet potato","Baby potatoes","Parsnip","Cassava","Taro","Yam"] },
 };
 
 export const SEASONAL_VEG = {
