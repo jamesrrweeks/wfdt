@@ -56,4 +56,35 @@ export default function App() {
       <div style={{ width:"390px", minHeight:"100vh", background:C.strokeWeak, fontFamily:F }}>
         {screen==="input" && (
           <InputScreen
-            onGenerate={handleGener
+            onGenerate={handleGenerate}
+            isLoading={isLoading}
+            onShowDS={()=>setScreen("ds")}
+          />
+        )}
+        {screen==="ds" && (
+          <DesignSystem onBack={()=>setScreen("input")}/>
+        )}
+        {screen==="results" && (
+          <>
+            {apiError && (
+              <div style={{ background:"#FFF0ED", borderBottom:"1px solid #F5C2B8", padding:"10px 20px", fontSize:"12px", color:C.red, fontFamily:F }}>
+                ⚠ {apiError}
+              </div>
+            )}
+            <ResultsScreen
+              prefs={prefs}
+              meals={meals}
+              isLoading={isLoading}
+              onSelect={m=>{ setSelectedMeal(m); setScreen("recipe"); }}
+              onBack={()=>setScreen("input")}
+              onRegenerate={cuisine=>handleGenerate({...prefs, cuisine})}
+            />
+          </>
+        )}
+        {screen==="recipe" && (
+          <RecipeScreen meal={selectedMeal} onBack={()=>setScreen("results")}/>
+        )}
+      </div>
+    </div>
+  );
+}
