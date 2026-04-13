@@ -52,3 +52,8 @@ export default function App() {
   };
 
   return (
+    <div style={{ background:C.strokeWeak, minHeight:"100vh", display:"flex", justifyContent:"center", fontFamily:F }}>
+      <div style={{ width:"390px", minHeight:"100vh", background:C.strokeWeak, fontFamily:F }}>
+        {screen==="input" && (
+          <InputScreen
+            onGenerate={handleGener
