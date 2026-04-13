@@ -1,39 +1,39 @@
 import { useState } from "react";
 import { C, SPACE, T, F, SHADOW } from "../tokens.js";
-import { SEASONS, SEASON_EMOJI, SEASONAL_VEG } from "../data.jsx";
+import { SEASONS, SEASONAL_VEG, SEASON_CATEGORIES } from "../data.jsx";
 import CategoryTab from "./CategoryTab.jsx";
 import TypeAheadInput from "./TypeAheadInput.jsx";
 
 export default function VegSelector({ season, onSeasonChange, selected, onChange }) {
   const [tab, setTab] = useState("All year");
   const sel = selected.filter(s=>s!=="Any");
-
   const handleTab = (t) => { setTab(t); if(t!=="All year") onSeasonChange(t); };
-  const toggle = (v) => { const next=sel.includes(v)?sel.filter(s=>s!==v):[...sel,v]; onChange(next.length===0?["Any"]:next); };
   const tabs = ["All year", ...SEASONS];
   const veg = SEASONAL_VEG[tab] || [];
+
+  const toggle = (v) => {
+    const next = sel.includes(v) ? sel.filter(s=>s!==v) : [...sel, v];
+    onChange(next.length===0 ? ["Any"] : next);
+  };
 
   return (
     <div>
       <div style={{ display:"flex", alignItems:"baseline", justifyContent:"space-between", marginBottom:`${SPACE.xs}px` }}>
         <div style={{ ...T.small, fontWeight:"700", color:C.textStrong }}>Vegetables</div>
-        {sel.length>0 && <button onClick={()=>onChange(["Any"])} style={{ background:"none", border:"none", cursor:"pointer", ...T.tiny, color:C.muted, fontFamily:F, textDecoration:"underline" }}>Clear</button>}
+        {sel.length>0 && (
+          <button onClick={()=>onChange(["Any"])} style={{ background:"none", border:"none", cursor:"pointer", ...T.tiny, color:C.muted, fontFamily:F, textDecoration:"underline" }}>Clear</button>
+        )}
       </div>
       <div style={{ display:"flex", gap:`${SPACE.xs}px`, overflowX:"auto", paddingBottom:`${SPACE.xs}px` }}>
-        {tabs.map(t => {
-          const emoji = t==="All year" ? "🌿" : SEASON_EMOJI[t];
-          return (
-            <CategoryTab
-              key={t}
-              label={t}
-              icon={(isActive) => (
-                <span style={{ fontSize:"18px", filter: isActive ? "brightness(10)" : "none" }}>{emoji}</span>
-              )}
-              active={tab===t}
-              onClick={()=>handleTab(t)}
-            />
-          );
-        })}
+        {tabs.map(t => (
+          <CategoryTab
+            key={t}
+            label={t}
+            icon={SEASON_CATEGORIES[t].icon}
+            active={tab===t}
+            onClick={()=>handleTab(t)}
+          />
+        ))}
       </div>
       <div style={{
         display:"flex", flexDirection:"column",
