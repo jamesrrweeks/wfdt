@@ -2,6 +2,7 @@ import { useState } from "react";
 import { C, SPACE, T, F } from "../tokens.js";
 import MacroBar from "./MacroBar.jsx";
 import Chip from "./Chip.jsx";
+import { supabase } from "../supabase.js";
 
 export default function RecipeScreen({ meal, onBack }) {
   const all = [...(meal.ingredients||[]),...(meal.pantryUsed||[])];
@@ -13,6 +14,10 @@ export default function RecipeScreen({ meal, onBack }) {
   const [hasEdits, setHasEdits]       = useState(false);
   const [copied, setCopied]           = useState(false);
   const [saved, setSaved]             = useState(false);
+  const [showAuth, setShowAuth]       = useState(false);
+  const [email, setEmail]             = useState("");
+  const [emailSent, setEmailSent]     = useState(false);
+  const [emailLoading, setEmailLoading] = useState(false);
 
   const removeIng = (i) => { setIngredients(p=>p.filter((_,idx)=>idx!==i)); setHasEdits(true); if(swapIdx===i)setSwapIdx(null); };
   const startSwap = (i) => { setSwapVal(ingredients[i]); setSwapIdx(i); };
@@ -33,13 +38,80 @@ export default function RecipeScreen({ meal, onBack }) {
     finally{setRegenLoading(false);}
   };
 
+  const handleSaveClick = () => {
+    setShowAuth(true);
+  };
+
+  const handleSendMagicLink = async () => {
+    if (!email.trim()) return;
+    setEmailLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email: email.trim(),
+        options: { emailRedirectTo: window.location.href }
+      });
+      if (!error) setEmailSent(true);
+    } catch {}
+    finally { setEmailLoading(false); }
+  };
+
   return (
     <div style={{ paddingBottom:"40px" }}>
+
+      {/* Bottom sheet overlay */}
+      {showAuth && (
+        <div
+          onClick={()=>setShowAuth(false)}
+          style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.5)", zIndex:100, display:"flex", alignItems:"flex-end", justifyContent:"center" }}
+        >
+          <div
+            onClick={e=>e.stopPropagation()}
+            style={{ width:"100%", maxWidth:"390px", background:C.background, borderRadius:"20px 20px 0 0", padding:"32px 24px 48px", display:"flex", flexDirection:"column", gap:"16px" }}
+          >
+            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+              <span style={{ fontSize:"11px", fontWeight:"700", letterSpacing:"0.1em", textTransform:"uppercase", color:C.muted, fontFamily:F }}>Save recipe</span>
+              <button onClick={()=>setShowAuth(false)} style={{ background:"none", border:"none", cursor:"pointer", fontSize:"18px", color:C.muted, padding:0 }}>✕</button>
+            </div>
+
+            {emailSent ? (
+              <div style={{ textAlign:"center", padding:"20px 0" }}>
+                <div style={{ fontSize:"32px", marginBottom:"12px" }}>📬</div>
+                <div style={{ ...T.h3, color:C.textStrong, marginBottom:"8px" }}>Check your email</div>
+                <div style={{ fontSize:"14px", color:C.muted, fontFamily:F, lineHeight:1.5 }}>We sent a link to <strong>{email}</strong> — tap it to sign in and your recipe will be saved.</div>
+              </div>
+            ) : (
+              <>
+                <div>
+                  <div style={{ ...T.h3, color:C.textStrong, marginBottom:"6px" }}>Save "{meal.name}"</div>
+                  <div style={{ fontSize:"14px", color:C.muted, fontFamily:F, lineHeight:1.5 }}>Enter your email and we'll send you a link — no password needed.</div>
+                </div>
+                <input
+                  type="email"
+                  placeholder="you@email.com"
+                  value={email}
+                  onChange={e=>setEmail(e.target.value)}
+                  onKeyDown={e=>{ if(e.key==="Enter") handleSendMagicLink(); }}
+                  style={{ padding:"14px 18px", borderRadius:"100px", border:`1.5px solid ${C.strokeStrong}`, background:C.card, fontSize:"15px", fontFamily:F, color:C.textStrong, outline:"none" }}
+                />
+                <button
+                  onClick={handleSendMagicLink}
+                  disabled={emailLoading || !email.trim()}
+                  style={{ width:"100%", padding:"16px", borderRadius:"100px", border:"none", background:emailLoading||!email.trim()?C.muted:C.primary, color:C.textStrong, fontSize:"15px", fontWeight:"700", fontFamily:F, cursor:emailLoading||!email.trim()?"not-allowed":"pointer" }}
+                >
+                  {emailLoading ? "Sending..." : "Send magic link →"}
+                </button>
+                <div style={{ fontSize:"12px", color:C.muted, fontFamily:F, textAlign:"center" }}>No password. No spam. Unsubscribe any time.</div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       <div style={{ background:C.strokeWeak, padding:`${SPACE.xxl}px ${SPACE.s}px ${SPACE.m}px`, borderBottom:`1px solid ${C.strokeStrong}` }}>
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"20px" }}>
           <button onClick={onBack} style={{ background:"none", border:"none", cursor:"pointer", color:C.muted, fontSize:"14px", fontFamily:F }}>← Back</button>
           <div style={{ display:"flex", gap:"8px", alignItems:"center" }}>
-            <Chip label={saved?"Saved ✓":"Save"} selected={saved} onClick={()=>setSaved(s=>!s)}/>
+            <Chip label={saved?"Saved ✓":"Save"} selected={saved} onClick={handleSaveClick}/>
             <button onClick={exportIngredients} style={{
               display:"flex", alignItems:"center", gap:`${SPACE.xs}px`, padding:"7px 14px", borderRadius:"100px", cursor:"pointer",
               border:`1.5px solid ${copied?"transparent":C.strokeStrong}`,
@@ -58,7 +130,6 @@ export default function RecipeScreen({ meal, onBack }) {
         {meal.macros && <div style={{ marginTop:"14px" }}><MacroBar protein={meal.macros.protein} carbs={meal.macros.carbs} fat={meal.macros.fat} size="lg" calories={meal.calories}/></div>}
       </div>
 
-      {/* everything below here is unchanged */}
       <div style={{ padding:"28px 20px", display:"flex", flexDirection:"column", gap:`${SPACE.m}px` }}>
         <div>
           <div style={{ display:"flex", justifyContent:"space-between", alignItems:"baseline", marginBottom:"14px" }}>
