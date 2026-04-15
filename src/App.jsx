@@ -14,7 +14,8 @@ link.rel = "stylesheet";
 link.href = "https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=Gasoek+One&display=swap";
 document.head.appendChild(link);
 
-const devMode = new URLSearchParams(window.location.search).has("dev");
+const devMode    = new URLSearchParams(window.location.search).has("dev");
+const resultMode = new URLSearchParams(window.location.search).has("results");
 
 export default function App() {
   const [screen, setScreen]             = useState(devMode ? "recipe" : "input");
