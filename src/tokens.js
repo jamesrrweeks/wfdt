@@ -1,5 +1,6 @@
 export const C = {
   primary:      "#CDEA45",
+  primaryMuted: "#E2EABB",   // ← new — pastel lime, used for tags/badges
   red:          "#BC4749",
   textStrong:   "#3D331A",
   textWeak:     "#7A7059",
