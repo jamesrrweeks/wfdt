@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { C, SPACE, T, F, FD, SHADOW } from "../tokens.js";
+import { C, SPACE, T, F, SHADOW } from "../tokens.js";
 import { SEASON_EMOJI } from "../data.jsx";
 import Chip from "./Chip.jsx";
 import MealCard from "./MealCard.jsx";
+import BottomNav from "./BottomNav.jsx";
 
 const CUISINES = ["Any","Italian","Asian","Mexican","Middle Eastern","Indian","Japanese","French","American","Mediterranean"];
 
@@ -84,7 +85,7 @@ export default function ResultsScreen({ prefs, meals, onSelect, onBack, onRegene
   };
 
   return (
-    <div style={{ paddingBottom:"120px" }}>
+    <div style={{ paddingBottom:"160px" }}>
       <style>{`@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
 
       {/* Header */}
@@ -106,7 +107,7 @@ export default function ResultsScreen({ prefs, meals, onSelect, onBack, onRegene
 
       {/* Cards */}
       <div style={{ padding:`0 ${SPACE.s}px`, display:"flex", flexDirection:"column", gap:`${SPACE.m}px` }}>
-        {meals.map((meal, i) => (
+        {meals.map((meal) => (
           <MealCard
             key={meal.id}
             meal={meal}
@@ -162,6 +163,14 @@ export default function ResultsScreen({ prefs, meals, onSelect, onBack, onRegene
         </button>
 
       </div>
+
+      {/* Bottom Nav */}
+      <BottomNav
+        active="home"
+        onHome={onBack}
+        onMyRecipes={() => {}}
+        onProfile={() => {}}
+      />
     </div>
   );
 }
