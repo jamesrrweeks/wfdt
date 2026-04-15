@@ -106,14 +106,16 @@ export default function ResultsScreen({ prefs, meals, onSelect, onBack, onRegene
 
       {/* Cards */}
       <div style={{ padding:`0 ${SPACE.s}px`, display:"flex", flexDirection:"column", gap:`${SPACE.m}px` }}>
-        {meals.map((meal) => (
-          <MealCard
-            key={meal.id}
-            meal={meal}
-            onSelect={onSelect}
-            onRemix={onRemix}
-          />
-        ))}
+       {meals.map((meal, i) => (
+  <MealCard
+    key={meal.id}
+    meal={meal}
+    prefs={prefs}
+    index={i}
+    onView={() => onSelect(meal)}
+    onRemix={() => onRemix(meal)}
+  />
+))}
       </div>
 
       {/* Footer */}
