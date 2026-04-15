@@ -1,9 +1,8 @@
 import { useState } from "react";
-import { C, SPACE, T, F, SHADOW } from "../tokens.js";
+import { C, SPACE, T, F } from "../tokens.js";
 import { SEASON_EMOJI } from "../data.jsx";
 import Chip from "./Chip.jsx";
 import MealCard from "./MealCard.jsx";
-import BottomNav from "./BottomNav.jsx";
 
 const CUISINES = ["Any","Italian","Asian","Mexican","Middle Eastern","Indian","Japanese","French","American","Mediterranean"];
 
