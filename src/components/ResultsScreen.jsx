@@ -163,13 +163,6 @@ export default function ResultsScreen({ prefs, meals, onSelect, onBack, onRegene
 
       </div>
 
-      {/* Bottom Nav */}
-      <BottomNav
-        active="home"
-        onHome={onBack}
-        onMyRecipes={() => {}}
-        onProfile={() => {}}
-      />
     </div>
   );
 }
