@@ -8,7 +8,17 @@ export function buildPrompt(prefs) {
 
   return `You are a meal planning assistant for New Zealand home cooks. Generate exactly 3 meal ideas as a JSON array.
 
-Each meal must include: name, emoji, description (1 sentence), time, difficulty (Easy/Medium/Hard), calories (number), ingredients (array of strings, hero ingredients only scaled for ${people} people), macros ({protein, carbs, fat} as percentages adding to 100), method (array of 4-5 strings).
+Each meal must include:
+- name (string)
+- description (1 sentence string)
+- icon (string — the single most dominant ingredient in this specific dish, must be exactly one of: "Chicken", "Beef & Lamb", "Seafood", "Vegetarian", "Rice & Grains", "Pasta & Noodles", "Bread & Wraps", "Potato & Root". For example: a beef ragu served on pasta = "Pasta & Noodles", a grilled steak = "Beef & Lamb", a chicken fried rice = "Rice & Grains", a fish taco = "Bread & Wraps")
+- cuisine (string — e.g. "Italian", "Japanese", "Mexican")
+- time (string — e.g. "25 mins", "1 hr")
+- difficulty (string — "Easy", "Medium", or "Hard")
+- calories (number — per serving)
+- ingredients (array of strings, hero ingredients only, scaled for ${people} people)
+- macros (object with protein, carbs, fat as percentages adding to 100)
+- method (array of 4–5 step strings)
 
 Preferences:
 - Servings: ${people}
