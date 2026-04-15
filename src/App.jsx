@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { C, F, FD } from "./tokens.js";
+import { C, F } from "./tokens.js";
 import { buildPrompt } from "./prompt.js";
 import { MOCK_MEALS } from "./data.jsx";
 import InputScreen from "./components/InputScreen.jsx";
 import ResultsScreen from "./components/ResultsScreen.jsx";
 import RecipeScreen from "./components/RecipeScreen.jsx";
 import DesignSystem from "./components/DesignSystem.jsx";
+import BottomNav from "./components/BottomNav.jsx";
 
 // Inject fonts once
 const link = document.createElement("link");
@@ -51,9 +52,15 @@ export default function App() {
     }
   };
 
+  // Map screen name to BottomNav active tab
+  const navActive = screen === "myrecipes" ? "myrecipes"
+                  : screen === "profile"   ? "profile"
+                  : "home";
+
   return (
     <div style={{ background:C.strokeWeak, minHeight:"100vh", display:"flex", justifyContent:"center", fontFamily:F }}>
       <div style={{ width:"390px", minHeight:"100vh", background:C.strokeWeak, fontFamily:F }}>
+
         {screen==="input" && (
           <InputScreen
             onGenerate={handleGenerate}
@@ -84,6 +91,16 @@ export default function App() {
         {screen==="recipe" && (
           <RecipeScreen meal={selectedMeal} onBack={()=>setScreen("results")}/>
         )}
+
+        {screen!=="ds" && (
+          <BottomNav
+            active={navActive}
+            onHome={()=>setScreen("input")}
+            onMyRecipes={()=>setScreen("myrecipes")}
+            onProfile={()=>setScreen("profile")}
+          />
+        )}
+
       </div>
     </div>
   );
