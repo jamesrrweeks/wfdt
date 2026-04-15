@@ -43,67 +43,79 @@ export default function InputScreen({ onGenerate, isLoading, onShowDS }) {
         </h1>
       </div>
 
-      <div style={{ display:"flex", flexDirection:"column", gap:"0" }}>
-
-        {/* Servings */}
-        <div style={{ padding:`0 ${SPACE.s}px`, marginBottom:`${SPACE.m}px` }}>
-          <div style={{ ...T.small, fontWeight:"700", color:C.textStrong, borderTop:`1px solid ${C.strokeStrong}`, paddingTop:`${SPACE.s}px`, marginBottom:`${SPACE.s}px` }}>How many servings?</div>
-          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
-            <Stepper value={people} onChange={setPeople}/>
-            <span style={{ ...T.tiny, color:C.muted, fontFamily:F }}>
-              {people===1?"Just me":people===2?"Two of us":`${people} people`}
-            </span>
-          </div>
-        </div>
-
-        {/* Protein */}
-        <div style={{ padding:`0 ${SPACE.s}px`, marginBottom:`${SPACE.m}px` }}>
-          <CategoryChipSelector label="Protein" categories={PROTEIN_CATEGORIES} selected={proteins} onChange={setProteins}/>
-        </div>
-
-        {/* Carbs */}
-        <div style={{ padding:`0 ${SPACE.s}px`, marginBottom:`${SPACE.m}px` }}>
-          <CategoryChipSelector label="Carbs" categories={CARB_CATEGORIES} selected={carbs} onChange={setCarbs}/>
-        </div>
-
-        {/* Veg */}
-        <div style={{ padding:`0 ${SPACE.s}px`, marginBottom:`${SPACE.m}px` }}>
-          <VegSelector season={season} onSeasonChange={handleSeasonChange} selected={veg} onChange={setVeg}/>
-        </div>
-
-        {/* Calorie & macro accordion */}
-        <div style={{ padding:`0 ${SPACE.s}px` }}>
-          <button onClick={()=>setDetailsOpen(o=>!o)} style={{
-            width:"100%", display:"flex", alignItems:"center", justifyContent:"space-between",
-            background:"none", border:"none", cursor:"pointer", borderTop:`1px solid ${C.strokeStrong}`,
-            paddingTop:"20px", paddingBottom: detailsOpen?"16px":"20px",
-          }}>
-            <div style={{ display:"flex", alignItems:"center", gap:"10px" }}>
-              <span style={{ fontSize:"15px", fontWeight:"700", color:C.textStrong, fontFamily:F }}>Calorie and macro details</span>
-              {!detailsOpen && <span style={{ fontSize:"12px", color:C.muted, fontFamily:F }}>{calories} kcal · {macros.protein}P/{macros.carbs}C/{macros.fat}F</span>}
-            </div>
-            <span style={{ fontSize:"12px", color:C.muted, transition:"transform 0.2s", display:"inline-block", transform:detailsOpen?"rotate(180deg)":"rotate(0deg)" }}>▼</span>
-          </button>
-          {detailsOpen && (
-            <div style={{ display:"flex", flexDirection:"column", gap:`${SPACE.m}px`, paddingBottom:"20px" }}>
-              <CalorieSlider value={calories} onChange={setCalories}/>
-              <MacroSelector value={macros} onChange={setMacros}/>
-            </div>
-          )}
-        </div>
-
-        {/* Anything else */}
-        <div style={{ padding:`0 ${SPACE.s}px`, marginBottom:`${SPACE.m}px` }}>
-          <div style={{ ...T.small, fontWeight:"700", color:C.textStrong, borderTop:`1px solid ${C.strokeStrong}`, paddingTop:`${SPACE.s}px`, marginBottom:`${SPACE.s}px` }}>Anything else?</div>
-          <AddContext
-            onAdd={(note) => { const v=note.trim(); if(v) setFreeNotes(prev=>[...prev,v]); }}
-            placeholder="e.g. nothing spicy, use up leftovers, allergic to nuts…"
-          />
-        </div>
+      {/* Protein */}
+      <div style={{ padding:`0 ${SPACE.s}px`, marginBottom:`${SPACE.m}px` }}>
+        <div style={{ ...T.small, fontWeight:"700", color:C.textStrong, marginBottom:`${SPACE.s}px` }}>Protein</div>
+        <CategoryChipSelector
+          categories={PROTEIN_CATEGORIES}
+          selected={proteins}
+          onChange={setProteins}
+        />
       </div>
 
-      {/* Sticky footer */}
-      <div style={{ position:"fixed", bottom:0, left:"50%", transform:"translateX(-50%)", width:"390px", padding:"12px 20px 32px", background:`linear-gradient(transparent, ${C.strokeWeak} 30%)`, zIndex:10 }}>
+      {/* Carbs */}
+      <div style={{ padding:`0 ${SPACE.s}px`, marginBottom:`${SPACE.m}px` }}>
+        <div style={{ ...T.small, fontWeight:"700", color:C.textStrong, marginBottom:`${SPACE.s}px` }}>Carbs</div>
+        <CategoryChipSelector
+          categories={CARB_CATEGORIES}
+          selected={carbs}
+          onChange={setCarbs}
+        />
+      </div>
+
+      {/* Veg */}
+      <div style={{ padding:`0 ${SPACE.s}px`, marginBottom:`${SPACE.m}px` }}>
+        <div style={{ ...T.small, fontWeight:"700", color:C.textStrong, marginBottom:`${SPACE.s}px` }}>Vegetables</div>
+        <VegSelector season={season} selected={veg} onChange={setVeg} onSeasonChange={handleSeasonChange}/>
+      </div>
+
+      {/* Serves */}
+      <div style={{ padding:`0 ${SPACE.s}px`, marginBottom:`${SPACE.m}px`, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+        <div style={{ ...T.small, fontWeight:"700", color:C.textStrong }}>Serves</div>
+        <Stepper value={people} min={1} max={8} onChange={setPeople}/>
+      </div>
+
+      {/* Calories accordion */}
+      <div style={{ marginBottom:`${SPACE.m}px`, borderTop:`1px solid ${C.strokeStrong}`, borderBottom:`1px solid ${C.strokeStrong}` }}>
+        <button onClick={()=>setDetailsOpen(o=>!o)} style={{
+          width:"100%", padding:`${SPACE.s}px`, background:"none", border:"none", cursor:"pointer",
+          display:"flex", justifyContent:"space-between", alignItems:"center",
+          minHeight: detailsOpen?"16px":"20px",
+        }}>
+          <div style={{ display:"flex", alignItems:"center", gap:"10px" }}>
+            <span style={{ fontSize:"15px", fontWeight:"700", color:C.textStrong, fontFamily:F }}>Calorie and macro details</span>
+            {!detailsOpen && <span style={{ fontSize:"12px", color:C.muted, fontFamily:F }}>{calories} kcal · {macros.protein}P/{macros.carbs}C/{macros.fat}F</span>}
+          </div>
+          <span style={{ fontSize:"12px", color:C.muted, transition:"transform 0.2s", display:"inline-block", transform:detailsOpen?"rotate(180deg)":"rotate(0deg)" }}>▼</span>
+        </button>
+        {detailsOpen && (
+          <div style={{ display:"flex", flexDirection:"column", gap:`${SPACE.m}px`, paddingBottom:"20px" }}>
+            <CalorieSlider value={calories} onChange={setCalories}/>
+            <MacroSelector value={macros} onChange={setMacros}/>
+          </div>
+        )}
+      </div>
+
+      {/* Anything else */}
+      <div style={{ padding:`0 ${SPACE.s}px`, marginBottom:`${SPACE.m}px` }}>
+        <div style={{ ...T.small, fontWeight:"700", color:C.textStrong, borderTop:`1px solid ${C.strokeStrong}`, paddingTop:`${SPACE.s}px`, marginBottom:`${SPACE.s}px` }}>Anything else?</div>
+        <AddContext
+          onAdd={(note) => { const v=note.trim(); if(v) setFreeNotes(prev=>[...prev,v]); }}
+          placeholder="e.g. nothing spicy, use up leftovers, allergic to nuts…"
+        />
+      </div>
+
+      {/* Sticky footer — sits above BottomNav (85px) */}
+      <div style={{
+        position: "fixed",
+        bottom: 85,
+        left: "50%",
+        transform: "translateX(-50%)",
+        width: "390px",
+        padding: "12px 20px 12px",
+        background: `linear-gradient(transparent, ${C.strokeWeak} 30%)`,
+        zIndex: 10,
+      }}>
         {(proteins.filter(s=>s!=="Any").length>0 || carbs.filter(s=>s!=="Any").length>0 || veg.filter(s=>s!=="Any").length>0 || freeNotes.length>0) && (
           <div style={{ display:"flex", flexWrap:"wrap", gap:`${SPACE.xs}px`, marginBottom:"10px" }}>
             {proteins.filter(s=>s!=="Any").map(item=>(
@@ -139,6 +151,7 @@ export default function InputScreen({ onGenerate, isLoading, onShowDS }) {
           {isLoading ? <><span style={{ width:18, height:18, border:`3px solid ${C.textStrong}`, borderTopColor:"transparent", borderRadius:"50%", display:"inline-block", animation:"spin 0.8s linear infinite" }}/> Finding ideas…</> : "✦ Generate meal"}
         </button>
       </div>
+
     </div>
   );
 }
