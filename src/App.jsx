@@ -1,49 +1,50 @@
 import { useState } from "react";
-import { C, F } from "./tokens.js";
+import { C, F, FD } from "./tokens.js";
 import { buildPrompt } from "./prompt.js";
 import { MOCK_MEALS } from "./data.jsx";
 import InputScreen from "./components/InputScreen.jsx";
 import ResultsScreen from "./components/ResultsScreen.jsx";
 import RecipeScreen from "./components/RecipeScreen.jsx";
 import DesignSystem from "./components/DesignSystem.jsx";
-import BottomNav from "./components/BottomNav.jsx";
 
-// Inject fonts once
 const link = document.createElement("link");
 link.rel = "stylesheet";
 link.href = "https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=Gasoek+One&display=swap";
 document.head.appendChild(link);
 
-const devMode    = new URLSearchParams(window.location.search).has("dev");
-const resultMode = new URLSearchParams(window.location.search).has("results");
+const params = new URLSearchParams(window.location.search);
+const devMode     = params.has("dev");
+const resultsMode = params.has("results");
 
 export default function App() {
-  const [screen, setScreen]             = useState(devMode ? "recipe" : resultMode ? "results" : "input");
-const [prefs, setPrefs]               = useState(resultMode ? { season:"Autumn", proteins:["Chicken"], carbs:["Any"], veg:["Any"], calories:500, macros:{ protein:30, carbs:40, fat:30 }, people:2 } : null);
-const [meals, setMeals]               = useState(devMode || resultMode ? MOCK_MEALS : null);
-const [selectedMeal, setSelectedMeal] = useState(devMode ? MOCK_MEALS[0] : null);
+  const [screen, setScreen]             = useState(devMode ? "recipe" : resultsMode ? "results" : "input");
+  const [prefs, setPrefs]               = useState(resultsMode ? { proteins:["Chicken"], carbs:["Rice"], veg:["Broccoli"], calories:500, people:2, season:"Autumn" } : null);
+  const [meals, setMeals]               = useState(resultsMode ? MOCK_MEALS : null);
+  const [selectedMeal, setSelectedMeal] = useState(devMode ? MOCK_MEALS[0] : null);
   const [isLoading, setIsLoading]       = useState(false);
   const [apiError, setApiError]         = useState(null);
 
   const handleGenerate = async (p) => {
-    setPrefs(p); setApiError(null); setIsLoading(true);
+    setPrefs(p);
+    setApiError(null);
+    setIsLoading(true);
     try {
       const r = await fetch("/api/generate", {
         method:"POST",
         headers:{
           "Content-Type":"application/json",
-          "x-secret-token": import.meta.env.VITE_API_SECRET_TOKEN
+          "x-secret-token": import.meta.env.VITE_API_SECRET_TOKEN,
         },
         body:JSON.stringify({
           model:"claude-sonnet-4-20250514",
           max_tokens:1500,
-          messages:[{ role:"user", content:buildPrompt(p) }]
-        })
+          messages:[{ role:"user", content:buildPrompt(p) }],
+        }),
       });
       const d = await r.json();
       const t = d.content[0].text;
       const c = t.replace(/```json|```/g,"").trim();
-      setMeals(JSON.parse(c).map((m,i)=>({...m, id:i+1})));
+      setMeals(JSON.parse(c).map((m,i) => ({ ...m, id:i+1 })));
     } catch {
       setApiError("Couldn't connect — showing example meals.");
       setMeals(MOCK_MEALS);
@@ -53,24 +54,14 @@ const [selectedMeal, setSelectedMeal] = useState(devMode ? MOCK_MEALS[0] : null)
     }
   };
 
-  // Map screen name to BottomNav active tab
-  const navActive = screen === "myrecipes" ? "myrecipes"
-                  : screen === "profile"   ? "profile"
-                  : "home";
-
   return (
-    <div style={{ background:C.strokeWeak, minHeight:"100vh", display:"flex", justifyContent:"center", fontFamily:F }}>
+    <div style={{ background:C.strokeWeak, minHeight:"100vh", display:"flex", justifyContent:"center", fontFamily:F, overflowY:"scroll" }}>
       <div style={{ width:"390px", minHeight:"100vh", background:C.strokeWeak, fontFamily:F }}>
-
         {screen==="input" && (
-          <InputScreen
-            onGenerate={handleGenerate}
-            isLoading={isLoading}
-            onShowDS={()=>setScreen("ds")}
-          />
+          <InputScreen onGenerate={handleGenerate} isLoading={isLoading} onShowDS={() => setScreen("ds")} />
         )}
         {screen==="ds" && (
-          <DesignSystem onBack={()=>setScreen("input")}/>
+          <DesignSystem onBack={() => setScreen("input")} />
         )}
         {screen==="results" && (
           <>
@@ -83,25 +74,16 @@ const [selectedMeal, setSelectedMeal] = useState(devMode ? MOCK_MEALS[0] : null)
               prefs={prefs}
               meals={meals}
               isLoading={isLoading}
-              onSelect={m=>{ setSelectedMeal(m); setScreen("recipe"); }}
-              onBack={()=>setScreen("input")}
-              onRegenerate={cuisine=>handleGenerate({...prefs, cuisine})}
+              onSelect={m => { setSelectedMeal(m); setScreen("recipe"); }}
+              onRemix={m => { setSelectedMeal(m); /* RemixModal — coming next */ }}
+              onBack={() => setScreen("input")}
+              onRegenerate={updatedPrefs => handleGenerate(updatedPrefs)}
             />
           </>
         )}
         {screen==="recipe" && (
-          <RecipeScreen meal={selectedMeal} onBack={()=>setScreen("results")}/>
+          <RecipeScreen meal={selectedMeal} onBack={() => setScreen("results")} />
         )}
-
-        {screen!=="ds" && (
-          <BottomNav
-            active={navActive}
-            onHome={()=>setScreen("input")}
-            onMyRecipes={()=>setScreen("myrecipes")}
-            onProfile={()=>setScreen("profile")}
-          />
-        )}
-
       </div>
     </div>
   );
