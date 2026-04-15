@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { C, F, FD } from "./tokens.js";
+import { C, F } from "./tokens.js";
 import { buildPrompt } from "./prompt.js";
 import { MOCK_MEALS } from "./data.jsx";
 import InputScreen from "./components/InputScreen.jsx";
 import ResultsScreen from "./components/ResultsScreen.jsx";
 import RecipeScreen from "./components/RecipeScreen.jsx";
 import DesignSystem from "./components/DesignSystem.jsx";
+import BottomNav from "./components/BottomNav.jsx";
 
 const link = document.createElement("link");
 link.rel = "stylesheet";
@@ -54,9 +55,12 @@ export default function App() {
     }
   };
 
+  const showNav = screen !== "ds";
+
   return (
     <div style={{ background:C.strokeWeak, minHeight:"100vh", display:"flex", justifyContent:"center", fontFamily:F, overflowY:"scroll" }}>
       <div style={{ width:"390px", minHeight:"100vh", background:C.strokeWeak, fontFamily:F }}>
+
         {screen==="input" && (
           <InputScreen onGenerate={handleGenerate} isLoading={isLoading} onShowDS={() => setScreen("ds")} />
         )}
@@ -84,6 +88,16 @@ export default function App() {
         {screen==="recipe" && (
           <RecipeScreen meal={selectedMeal} onBack={() => setScreen("results")} />
         )}
+
+        {showNav && (
+          <BottomNav
+            active={screen === "myrecipes" ? "myrecipes" : "home"}
+            onHome={() => setScreen("input")}
+            onMyRecipes={() => setScreen("myrecipes")}
+            onProfile={() => {}}
+          />
+        )}
+
       </div>
     </div>
   );
