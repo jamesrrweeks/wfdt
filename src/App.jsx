@@ -18,10 +18,10 @@ const devMode    = new URLSearchParams(window.location.search).has("dev");
 const resultMode = new URLSearchParams(window.location.search).has("results");
 
 export default function App() {
-  const [screen, setScreen]             = useState(devMode ? "recipe" : "input");
-  const [prefs, setPrefs]               = useState(null);
-  const [meals, setMeals]               = useState(null);
-  const [selectedMeal, setSelectedMeal] = useState(devMode ? MOCK_MEALS[0] : null);
+  const [screen, setScreen]             = useState(devMode ? "recipe" : resultMode ? "results" : "input");
+const [prefs, setPrefs]               = useState(resultMode ? { season:"Autumn", proteins:["Chicken"], carbs:["Any"], veg:["Any"], calories:500, macros:{ protein:30, carbs:40, fat:30 }, people:2 } : null);
+const [meals, setMeals]               = useState(devMode || resultMode ? MOCK_MEALS : null);
+const [selectedMeal, setSelectedMeal] = useState(devMode ? MOCK_MEALS[0] : null);
   const [isLoading, setIsLoading]       = useState(false);
   const [apiError, setApiError]         = useState(null);
 
