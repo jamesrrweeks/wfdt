@@ -59,7 +59,7 @@ export default function App() {
 
   return (
     <div style={{ background:C.strokeWeak, minHeight:"100vh", display:"flex", justifyContent:"center", fontFamily:F, overflowY:"scroll" }}>
-      <div style={{ width:"390px", minHeight:"100vh", background:C.strokeWeak, fontFamily:F }}>
+      <div style={{ width:"390px", minHeight:"100vh", background:C.fill, fontFamily:F }}>
 
         {screen==="input" && (
           <InputScreen onGenerate={handleGenerate} isLoading={isLoading} onShowDS={() => setScreen("ds")} />
@@ -86,7 +86,7 @@ export default function App() {
           </>
         )}
         {screen==="recipe" && (
-          <RecipeScreen meal={selectedMeal} onBack={() => setScreen("results")} />
+          <RecipeScreen meal={selectedMeal} prefs={prefs} onBack={() => setScreen("results")} />
         )}
 
         {showNav && (
