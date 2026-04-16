@@ -120,7 +120,7 @@ export default function RecipeScreen({ meal, prefs, onBack }) {
   return (
 <div style={{ minHeight: "100vh", paddingBottom: 120 }}>
       {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: `${SPACE.m}px ${SPACE.s}px ${SPACE.xs}px` }}>
+<div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: `80px ${SPACE.s}px ${SPACE.xs}px` }}>
         <button
           onClick={onBack}
           style={{ display: "flex", alignItems: "center", gap: 4, background: "none", border: "none", cursor: "pointer", padding: "5px 0" }}
