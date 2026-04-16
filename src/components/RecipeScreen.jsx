@@ -1,46 +1,223 @@
 import { useState } from "react";
-import { C, SPACE, T, F } from "../tokens.js";
+import { C, SPACE, T, F, FD, SHADOW } from "../tokens.js";
 import MacroBar from "./MacroBar.jsx";
 import Chip from "./Chip.jsx";
+import IngredientSwapModal from "./IngredientSwapModal.jsx";
+import AmountEditModal from "./AmountEditModal.jsx";
+import RegenerateBar from "./RegenerateBar.jsx";
 import { supabase } from "../supabase.js";
 
+// ─── Close icon (×) ──────────────────────────────────────────────────────────
+const CloseIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+    <path d="M8.41245 16.9875L7.01245 15.5875L10.6125 11.9875L7.01245 8.41251L8.41245 7.01251L12.0125 10.6125L15.5875 7.01251L16.9875 8.41251L13.3875 11.9875L16.9875 15.5875L15.5875 16.9875L12.0125 13.3875L8.41245 16.9875Z" fill={C.strokeStrong}/>
+  </svg>
+);
+
+// ─── Ingredient table ─────────────────────────────────────────────────────────
+// Each ingredient: { name: string, amount: string, source: "user" | "ai" }
+
+function IngredientTable({ ingredients, onSwapOpen, onAmountOpen, onRemove }) {
+  const tagNameStyle = (source) => ({
+    fontFamily:     F,
+    fontSize:       14,
+    lineHeight:     "20px",
+    fontWeight:     "400",
+    color:          C.textStrong,
+    background:     source === "user" ? C.primaryMuted : C.strokeWeak,
+    border:         "none",
+    borderRadius:   8,
+    padding:        "3px 16px",
+    height:         30,
+    display:        "inline-flex",
+    alignItems:     "center",
+    cursor:         "pointer",
+    width:          "fit-content",
+    whiteSpace:     "nowrap",
+    transition:     "background 0.15s",
+  });
+
+  const tagAmountStyle = {
+    fontFamily:     F,
+    fontSize:       14,
+    lineHeight:     "20px",
+    fontWeight:     "400",
+    color:          C.textStrong,
+    background:     C.strokeWeak,
+    borderRadius:   8,
+    padding:        "3px 16px",
+    height:         30,
+    display:        "inline-flex",
+    alignItems:     "center",
+    whiteSpace:     "nowrap",
+    width:          "fit-content",
+    cursor:         "pointer",
+    border:         "none",
+    transition:     "background 0.15s",
+  };
+
+  const rowStyle = {
+    display:     "grid",
+    gridTemplateColumns: "1fr 110px 32px",
+    alignItems:  "center",
+  };
+
+  return (
+    <div style={{
+      background:   C.background,
+      boxShadow:    SHADOW.overlay,
+      borderRadius: 16,
+      padding:      SPACE.s,
+      display:      "flex",
+      flexDirection:"column",
+      gap:          12,
+    }}>
+      {/* Column headers */}
+      <div style={rowStyle}>
+        <span style={{ ...T.tiny, color: C.textWeak }}>Item</span>
+        <span style={{ ...T.tiny, color: C.textWeak }}>Amount</span>
+        <span />
+      </div>
+
+      {/* Rows */}
+      {ingredients.map((ing, i) => (
+        <div key={i} style={rowStyle}>
+          <button style={tagNameStyle(ing.source)} onClick={() => onSwapOpen(ing, i)}>
+            {ing.name}
+          </button>
+          <button style={tagAmountStyle} onClick={() => onAmountOpen(ing, i)}>
+            {ing.amount}
+          </button>
+          <button
+            onClick={() => onRemove(i)}
+            style={{
+              width:          24,
+              height:         24,
+              display:        "flex",
+              alignItems:     "center",
+              justifyContent: "center",
+              justifySelf:    "center",
+              background:     "none",
+              border:         "none",
+              cursor:         "pointer",
+              borderRadius:   4,
+              padding:        0,
+            }}
+          >
+            <CloseIcon />
+          </button>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─── Main component ───────────────────────────────────────────────────────────
+
 export default function RecipeScreen({ meal, onBack }) {
-  const all = [...(meal.ingredients||[]),...(meal.pantryUsed||[])];
-  const [ingredients, setIngredients] = useState(all);
-  const [swapIdx, setSwapIdx]         = useState(null);
-  const [swapVal, setSwapVal]         = useState("");
-  const [method, setMethod]           = useState(meal.method);
+
+  // Build initial ingredient list from meal data.
+  // Supports both new shape { name, amount, source } and legacy string arrays.
+  const toIngObj = (ing) => {
+    if (typeof ing === "object" && ing.name) return ing;
+    // Legacy: plain string like "Chicken breast 400g"
+    const parts = ing.trim().match(/^(.*?)\s+([\d.]+\s*\S*)$/);
+    if (parts) return { name: parts[1], amount: parts[2], source: "user" };
+    return { name: ing, amount: "", source: "user" };
+  };
+
+  const initialIngredients = [
+    ...(meal.ingredients  || []).map(i => toIngObj(i)),
+    ...(meal.pantryUsed   || []).map(i => ({ ...toIngObj(i), source: "ai" })),
+  ];
+
+  const [ingredients, setIngredients]   = useState(initialIngredients);
+  const [method, setMethod]             = useState(meal.method || []);
+  const [hasEdits, setHasEdits]         = useState(false);
   const [regenLoading, setRegenLoading] = useState(false);
-  const [hasEdits, setHasEdits]       = useState(false);
-  const [copied, setCopied]           = useState(false);
-  const [saved, setSaved]             = useState(false);
-  const [showAuth, setShowAuth]       = useState(false);
-  const [email, setEmail]             = useState("");
-  const [codeSent, setCodeSent]       = useState(false);
-  const [code, setCode]               = useState("");
+
+  // Modal state
+  const [swapTarget, setSwapTarget]     = useState(null); // { ingredient, index }
+  const [amountTarget, setAmountTarget] = useState(null); // { ingredient, index }
+
+  // Auth / save state (preserved from original)
+  const [copied, setCopied]             = useState(false);
+  const [saved, setSaved]               = useState(false);
+  const [showAuth, setShowAuth]         = useState(false);
+  const [email, setEmail]               = useState("");
+  const [codeSent, setCodeSent]         = useState(false);
+  const [code, setCode]                 = useState("");
   const [emailLoading, setEmailLoading] = useState(false);
   const [verifyLoading, setVerifyLoading] = useState(false);
 
-  const removeIng = (i) => { setIngredients(p=>p.filter((_,idx)=>idx!==i)); setHasEdits(true); if(swapIdx===i)setSwapIdx(null); };
-  const startSwap = (i) => { setSwapVal(ingredients[i]); setSwapIdx(i); };
-  const confirmSwap = (i) => {
-    const v=swapVal.trim(); if(!v){setSwapIdx(null);return;}
-    setIngredients(p=>p.map((ing,idx)=>idx===i?v:ing)); setSwapIdx(null); setSwapVal(""); setHasEdits(true);
+  // ── Ingredient actions ────────────────────────────────────────────────────
+
+  const handleRemove = (index) => {
+    setIngredients(prev => prev.filter((_, i) => i !== index));
+    setHasEdits(true);
   };
-  const exportIngredients = () => {
-    const text=`${meal.name} — Ingredients\n\n${ingredients.join("\n")}`;
-    navigator.clipboard.writeText(text).then(()=>{setCopied(true);setTimeout(()=>setCopied(false),2000);}).catch(()=>{setCopied(true);setTimeout(()=>setCopied(false),2000);});
+
+  const handleSwapConfirm = (updatedIng) => {
+    setIngredients(prev => prev.map((ing, i) => i === swapTarget.index ? updatedIng : ing));
+    setSwapTarget(null);
+    setHasEdits(true);
   };
+
+  const handleAmountConfirm = (updatedIng) => {
+    setIngredients(prev => prev.map((ing, i) => i === amountTarget.index ? updatedIng : ing));
+    setAmountTarget(null);
+    setHasEdits(true);
+  };
+
+  // ── Regenerate method ─────────────────────────────────────────────────────
+
   const regenerateMethod = async () => {
     setRegenLoading(true);
     try {
-      const r = await fetch("/api/generate",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:600,messages:[{role:"user",content:`You are a cooking assistant. The user modified ingredients for "${meal.name}".\nIngredients: ${ingredients.join(", ")}\nWrite a new method (4-5 steps). Respond ONLY with a JSON array of steps e.g. ["Step one.","Step two."]\nNo explanation, no markdown.`}]})});
-      const d=await r.json(); const t=d.content[0].text; const s=JSON.parse(t.replace(/```json|```/g,"").trim()); setMethod(s); setHasEdits(false);
-    } catch{}
-    finally{setRegenLoading(false);}
+      const ingList = ingredients.map(i => `${i.name}${i.amount ? " " + i.amount : ""}`).join(", ");
+      const r = await fetch("/api/generate", {
+        method:  "POST",
+        headers: {
+          "Content-Type":   "application/json",
+          "x-secret-token": import.meta.env.VITE_API_SECRET_TOKEN,
+        },
+        body: JSON.stringify({
+          model:      "claude-sonnet-4-20250514",
+          max_tokens: 600,
+          messages: [{
+            role:    "user",
+            content: `You are a cooking assistant. The user modified ingredients for "${meal.name}".
+Ingredients: ${ingList}
+Write a new method (4–5 steps). Respond ONLY with a JSON array of step strings.
+No explanation, no markdown, no code fences.`,
+          }],
+        }),
+      });
+      const d = await r.json();
+      const t = d.content[0].text;
+      const steps = JSON.parse(t.replace(/```json|```/g, "").trim());
+      setMethod(steps);
+      setHasEdits(false);
+    } catch (e) {
+      console.error("Regenerate failed", e);
+    } finally {
+      setRegenLoading(false);
+    }
   };
 
-  const handleSaveClick = () => setShowAuth(true);
+  // ── Export ────────────────────────────────────────────────────────────────
+
+  const exportIngredients = () => {
+    const lines = ingredients.map(i => `${i.name}${i.amount ? " — " + i.amount : ""}`);
+    const text  = `${meal.name} — Ingredients\n\n${lines.join("\n")}`;
+    navigator.clipboard.writeText(text)
+      .then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); })
+      .catch(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); });
+  };
+
+  // ── Auth / save (unchanged from original) ─────────────────────────────────
+
+  const handleSaveClick  = () => setShowAuth(true);
 
   const handleSendCode = async () => {
     if (!email.trim()) return;
@@ -48,7 +225,7 @@ export default function RecipeScreen({ meal, onBack }) {
     try {
       const { error } = await supabase.auth.signInWithOtp({
         email: email.trim(),
-        options: { shouldCreateUser: true }
+        options: { shouldCreateUser: true },
       });
       if (!error) setCodeSent(true);
     } catch {}
@@ -62,155 +239,183 @@ export default function RecipeScreen({ meal, onBack }) {
       const { error } = await supabase.auth.verifyOtp({
         email: email.trim(),
         token: code.trim(),
-        type: "email"
+        type:  "email",
       });
-      if (!error) {
-        setSaved(true);
-        setShowAuth(false);
-      }
+      if (!error) { setSaved(true); setShowAuth(false); }
     } catch {}
     finally { setVerifyLoading(false); }
   };
 
+  // ── Render ─────────────────────────────────────────────────────────────────
+
   return (
-    <div style={{ paddingBottom:"40px" }}>
+    <div style={{ paddingBottom: hasEdits ? 140 : 40 }}>
+      <style>{`@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
 
-      {/* Bottom sheet */}
-      {showAuth && (
-        <div
-          onClick={()=>setShowAuth(false)}
-          style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.5)", zIndex:100, display:"flex", alignItems:"flex-end", justifyContent:"center" }}
-        >
-          <div
-            onClick={e=>e.stopPropagation()}
-            style={{ width:"100%", maxWidth:"390px", background:C.background, borderRadius:"20px 20px 0 0", padding:"32px 24px 48px", display:"flex", flexDirection:"column", gap:"16px" }}
+      {/* Header */}
+      <div style={{ background: C.primary, padding: `${SPACE.xl}px ${SPACE.s}px ${SPACE.m}px` }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: SPACE.s }}>
+          <button
+            onClick={onBack}
+            style={{ background: "none", border: "none", cursor: "pointer", color: C.textStrong, fontFamily: F, fontSize: 14, fontWeight: "700", padding: 0 }}
           >
-            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-              <span style={{ fontSize:"11px", fontWeight:"700", letterSpacing:"0.1em", textTransform:"uppercase", color:C.muted, fontFamily:F }}>Save recipe</span>
-              <button onClick={()=>setShowAuth(false)} style={{ background:"none", border:"none", cursor:"pointer", fontSize:"18px", color:C.muted, padding:0 }}>✕</button>
-            </div>
-
-            {!codeSent ? (
-              <>
-                <div>
-                  <div style={{ ...T.h3, color:C.textStrong, marginBottom:"6px" }}>Save "{meal.name}"</div>
-                  <div style={{ fontSize:"14px", color:C.muted, fontFamily:F, lineHeight:1.5 }}>Enter your email and we'll send you a 6-digit code.</div>
-                </div>
-                <input
-                  type="email"
-                  placeholder="you@email.com"
-                  value={email}
-                  onChange={e=>setEmail(e.target.value)}
-                  onKeyDown={e=>{ if(e.key==="Enter") handleSendCode(); }}
-                  style={{ padding:"14px 18px", borderRadius:"100px", border:`1.5px solid ${C.strokeStrong}`, background:C.card, fontSize:"15px", fontFamily:F, color:C.textStrong, outline:"none" }}
-                />
-                <button
-                  onClick={handleSendCode}
-                  disabled={emailLoading || !email.trim()}
-                  style={{ width:"100%", padding:"16px", borderRadius:"100px", border:"none", background:emailLoading||!email.trim()?C.muted:C.primary, color:C.textStrong, fontSize:"15px", fontWeight:"700", fontFamily:F, cursor:emailLoading||!email.trim()?"not-allowed":"pointer" }}
-                >
-                  {emailLoading ? "Sending..." : "Send code →"}
-                </button>
-              </>
-            ) : (
-              <>
-                <div>
-                  <div style={{ ...T.h3, color:C.textStrong, marginBottom:"6px" }}>Check your email</div>
-                  <div style={{ fontSize:"14px", color:C.muted, fontFamily:F, lineHeight:1.5 }}>We sent a 6-digit code to <strong>{email}</strong></div>
-                </div>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  placeholder="000000"
-                  maxLength={6}
-                  value={code}
-                  onChange={e=>setCode(e.target.value.replace(/\D/g,""))}
-                  onKeyDown={e=>{ if(e.key==="Enter") handleVerifyCode(); }}
-                  style={{ padding:"14px 18px", borderRadius:"100px", border:`1.5px solid ${C.strokeStrong}`, background:C.card, fontSize:"24px", fontFamily:F, color:C.textStrong, outline:"none", textAlign:"center", letterSpacing:"0.3em" }}
-                />
-                <button
-                  onClick={handleVerifyCode}
-                  disabled={verifyLoading || code.length < 6}
-                  style={{ width:"100%", padding:"16px", borderRadius:"100px", border:"none", background:verifyLoading||code.length<6?C.muted:C.primary, color:C.textStrong, fontSize:"15px", fontWeight:"700", fontFamily:F, cursor:verifyLoading||code.length<6?"not-allowed":"pointer" }}
-                >
-                  {verifyLoading ? "Verifying..." : "Confirm code →"}
-                </button>
-                <button onClick={()=>setCodeSent(false)} style={{ background:"none", border:"none", cursor:"pointer", fontSize:"13px", color:C.muted, fontFamily:F, textAlign:"center" }}>← Use a different email</button>
-              </>
-            )}
+            ← Back
+          </button>
+          <div style={{ display: "flex", gap: SPACE.xs }}>
+            <Chip
+              label={saved ? "Saved ✓" : "Save"}
+              selected={saved}
+              onClick={handleSaveClick}
+            />
+            <button
+              onClick={exportIngredients}
+              style={{
+                display:     "flex",
+                alignItems:  "center",
+                gap:         SPACE.xxs,
+                padding:     "7px 14px",
+                borderRadius:"100px",
+                cursor:      "pointer",
+                border:      `1.5px solid ${copied ? "transparent" : C.textStrong}`,
+                background:  copied ? C.background : "transparent",
+                color:       C.textStrong,
+                fontSize:    12,
+                fontFamily:  F,
+                fontWeight:  "600",
+                transition:  "all 0.2s",
+              }}
+            >
+              {copied ? "✓ Copied!" : "↑ Export"}
+            </button>
           </div>
         </div>
-      )}
 
-      <div style={{ background:C.strokeWeak, padding:`${SPACE.xxl}px ${SPACE.s}px ${SPACE.m}px`, borderBottom:`1px solid ${C.strokeStrong}` }}>
-        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"20px" }}>
-          <button onClick={onBack} style={{ background:"none", border:"none", cursor:"pointer", color:C.muted, fontSize:"14px", fontFamily:F }}>← Back</button>
-          <div style={{ display:"flex", gap:"8px", alignItems:"center" }}>
-            <Chip label={saved?"Saved ✓":"Save"} selected={saved} onClick={handleSaveClick}/>
-            <button onClick={exportIngredients} style={{
-              display:"flex", alignItems:"center", gap:`${SPACE.xs}px`, padding:"7px 14px", borderRadius:"100px", cursor:"pointer",
-              border:`1.5px solid ${copied?"transparent":C.strokeStrong}`,
-              background:copied?C.primary:"transparent",
-              color:C.textStrong, fontSize:"12px", fontFamily:F, fontWeight:"600", transition:"all 0.2s",
-            }}>{copied?"✓ Copied!":"↑ Export ingredients"}</button>
+        <div style={{ fontSize: 44, marginBottom: 14 }}>{meal.emoji}</div>
+        <h1 style={{ ...T.h1, color: C.textStrong, margin: "0 0 10px" }}>{meal.name}</h1>
+
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <span style={{ background: C.background, borderRadius: 100, padding: "5px 14px", fontSize: 12, fontWeight: "700", color: C.textStrong, fontFamily: F }}>⏱ {meal.time}</span>
+          <span style={{ background: C.background, borderRadius: 100, padding: "5px 14px", fontSize: 12, color: C.textStrong, fontFamily: F }}>{meal.difficulty}</span>
+          <span style={{ background: C.background, borderRadius: 100, padding: "5px 14px", fontSize: 12, color: C.textStrong, fontFamily: F }}>🔥 {meal.calories} kcal</span>
+        </div>
+
+        {meal.macros && (
+          <div style={{ marginTop: 14 }}>
+            <MacroBar protein={meal.macros.protein} carbs={meal.macros.carbs} fat={meal.macros.fat} size="lg" calories={meal.calories} />
           </div>
-        </div>
-        <div style={{ fontSize:"44px", marginBottom:"14px" }}>{meal.emoji}</div>
-        <h2 style={{ ...T.h2, color:C.textStrong, margin:"0 0 10px" }}>{meal.name}</h2>
-        <div style={{ display:"flex", gap:"8px", flexWrap:"wrap" }}>
-          <span style={{ background:C.primary, borderRadius:"100px", padding:"5px 14px", fontSize:"12px", fontWeight:"700", color:C.textStrong, fontFamily:F }}>⏱ {meal.time}</span>
-          <span style={{ background:C.background, border:`1px solid ${C.strokeStrong}`, borderRadius:"100px", padding:"5px 14px", fontSize:"12px", color:C.textStrong, fontFamily:F }}>{meal.difficulty}</span>
-          <span style={{ background:C.background, border:`1px solid ${C.strokeStrong}`, borderRadius:"100px", padding:"5px 14px", fontSize:"12px", color:C.textStrong, fontFamily:F }}>🔥 {meal.calories} kcal</span>
-        </div>
-        {meal.macros && <div style={{ marginTop:"14px" }}><MacroBar protein={meal.macros.protein} carbs={meal.macros.carbs} fat={meal.macros.fat} size="lg" calories={meal.calories}/></div>}
+        )}
       </div>
 
-      <div style={{ padding:"28px 20px", display:"flex", flexDirection:"column", gap:`${SPACE.m}px` }}>
+      {/* Content */}
+      <div style={{ padding: `${SPACE.m}px ${SPACE.s}px`, display: "flex", flexDirection: "column", gap: SPACE.m }}>
+
+        {/* Ingredients */}
         <div>
-          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"baseline", marginBottom:"14px" }}>
-            <h3 style={{ ...T.h3, color:C.textStrong, margin:0 }}>Ingredients</h3>
-            <span style={{ fontSize:"11px", color:C.muted, fontFamily:F, fontStyle:"italic" }}>swap or remove</span>
-          </div>
-          {ingredients.map((ing,i)=>(
-            <div key={i}>
-              {swapIdx===i ? (
-                <div style={{ padding:"10px 0", borderBottom:i<ingredients.length-1?`1px solid ${C.strokeStrong}`:"none", display:"flex", gap:"8px", alignItems:"center" }}>
-                  <input autoFocus value={swapVal} onChange={e=>setSwapVal(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")confirmSwap(i);if(e.key==="Escape")setSwapIdx(null);}}
-                    style={{ flex:1, padding:"8px 14px", borderRadius:"100px", border:`1.5px solid ${C.textStrong}`, background:C.background, fontSize:"14px", fontFamily:F, color:C.textStrong }}/>
-                  <button onClick={()=>confirmSwap(i)} style={{ width:30, height:30, borderRadius:"50%", background:C.textStrong, border:"none", color:C.primary, fontSize:"14px", cursor:"pointer" }}>✓</button>
-                  <button onClick={()=>setSwapIdx(null)} style={{ width:30, height:30, borderRadius:"50%", background:"transparent", border:`1.5px solid ${C.strokeStrong}`, color:C.muted, fontSize:"12px", cursor:"pointer" }}>✕</button>
-                </div>
-              ):(
-                <div style={{ padding:"13px 0", borderBottom:i<ingredients.length-1?`1px solid ${C.strokeStrong}`:"none", display:"flex", justifyContent:"space-between", alignItems:"center", gap:"10px" }}>
-                  <span style={{ fontSize:"14px", color:C.textStrong, fontFamily:F, lineHeight:1.4, flex:1 }}>{ing}</span>
-                  <div style={{ display:"flex", gap:"8px", flexShrink:0 }}>
-                    <button onClick={()=>startSwap(i)} style={{ width:28, height:28, borderRadius:"50%", background:C.primary, border:"none", cursor:"pointer", fontSize:"13px", color:C.textStrong, display:"flex", alignItems:"center", justifyContent:"center", fontWeight:"700" }}>⇄</button>
-                    <button onClick={()=>removeIng(i)} style={{ background:"none", border:"none", cursor:"pointer", fontSize:"14px", color:C.strokeStrong, padding:"0" }}>✕</button>
-                  </div>
-                </div>
-              )}
-            </div>
-          ))}
+          <h2 style={{ ...T.h3, color: C.textStrong, margin: `0 0 ${SPACE.xs}px` }}>Ingredients</h2>
+          <IngredientTable
+            ingredients={ingredients}
+            onSwapOpen={(ing, index)   => setSwapTarget({ ingredient: ing, index })}
+            onAmountOpen={(ing, index) => setAmountTarget({ ingredient: ing, index })}
+            onRemove={handleRemove}
+          />
         </div>
 
-        {hasEdits && (
-          <button onClick={regenerateMethod} disabled={regenLoading} style={{ width:"100%", padding:"15px", borderRadius:"100px", border:"none", background:regenLoading?C.muted:C.primary, color:C.textStrong, fontSize:"14px", fontWeight:"700", fontFamily:F, cursor:regenLoading?"not-allowed":"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:"8px" }}>
-            {regenLoading?<><span style={{animation:"spin 1s linear infinite",display:"inline-block"}}>✦</span>Updating method...</>:"✦ Regenerate method with new ingredients"}
-          </button>
-        )}
-
+        {/* Method */}
         <div>
-          <h3 style={{ ...T.h3, color:C.textStrong, margin:"0 0 14px" }}>Method</h3>
-          <div style={{ display:"flex", flexDirection:"column", gap:`${SPACE.xs}px` }}>
-            {method.map((step,i)=>(
-              <div key={i} style={{ display:"flex", gap:`${SPACE.xs}px`, alignItems:"flex-start" }}>
-                <div style={{ width:"26px", height:"26px", borderRadius:"50%", background:C.primary, display:"flex", alignItems:"center", justifyContent:"center", fontSize:"12px", fontWeight:"700", color:C.textStrong, fontFamily:F, flexShrink:0, marginTop:"1px" }}>{i+1}</div>
-                <p style={{ margin:0, fontSize:"14px", lineHeight:"1.6", color:C.textStrong, fontFamily:F }}>{step}</p>
+          <h2 style={{ ...T.h3, color: C.textStrong, margin: `0 0 ${SPACE.xs}px` }}>Method</h2>
+          <div style={{ display: "flex", flexDirection: "column", gap: SPACE.xs }}>
+            {method.map((step, i) => (
+              <div key={i} style={{
+                background:   C.background,
+                borderRadius: 12,
+                padding:      `${SPACE.s}px`,
+                boxShadow:    SHADOW.raised,
+                display:      "flex",
+                gap:          SPACE.xs,
+              }}>
+                <span style={{ ...T.tiny, fontWeight: "700", color: C.primary, minWidth: 20 }}>{i + 1}</span>
+                <span style={{ ...T.tiny, color: C.textStrong, lineHeight: "1.5" }}>{step}</span>
               </div>
             ))}
           </div>
         </div>
       </div>
+
+      {/* Modals */}
+      <IngredientSwapModal
+        ingredient={swapTarget?.ingredient || null}
+        onConfirm={handleSwapConfirm}
+        onClose={() => setSwapTarget(null)}
+      />
+      <AmountEditModal
+        ingredient={amountTarget?.ingredient || null}
+        onConfirm={handleAmountConfirm}
+        onClose={() => setAmountTarget(null)}
+      />
+
+      {/* Regen bar */}
+      <RegenerateBar
+        visible={hasEdits}
+        loading={regenLoading}
+        onRegenerate={regenerateMethod}
+      />
+
+      {/* Auth sheet (preserved from original) */}
+      {showAuth && (
+        <div
+          onClick={() => setShowAuth(false)}
+          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 200, display: "flex", alignItems: "flex-end", justifyContent: "center" }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{ width: "100%", maxWidth: "390px", background: C.background, borderRadius: "20px 20px 0 0", padding: "32px 24px 48px", display: "flex", flexDirection: "column", gap: 16 }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ fontSize: 11, fontWeight: "700", letterSpacing: "0.1em", textTransform: "uppercase", color: C.muted, fontFamily: F }}>Save recipe</span>
+              <button onClick={() => setShowAuth(false)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 18, color: C.muted, padding: 0 }}>✕</button>
+            </div>
+
+            {!codeSent ? (
+              <>
+                <p style={{ fontFamily: F, fontSize: 14, color: C.textStrong, margin: 0 }}>Enter your email to save this recipe.</p>
+                <input
+                  type="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  style={{ padding: "12px 16px", borderRadius: 100, border: `1.5px solid ${C.strokeStrong}`, fontFamily: F, fontSize: 14, color: C.textStrong, background: C.background, outline: "none" }}
+                />
+                <button
+                  onClick={handleSendCode}
+                  disabled={emailLoading}
+                  style={{ padding: "14px", borderRadius: 100, border: "none", background: C.primary, color: C.textStrong, fontFamily: F, fontWeight: "700", fontSize: 15, cursor: "pointer" }}
+                >
+                  {emailLoading ? "Sending…" : "Send code"}
+                </button>
+              </>
+            ) : (
+              <>
+                <p style={{ fontFamily: F, fontSize: 14, color: C.textStrong, margin: 0 }}>Enter the 6-digit code sent to {email}.</p>
+                <input
+                  type="text"
+                  placeholder="000000"
+                  value={code}
+                  onChange={e => setCode(e.target.value)}
+                  maxLength={6}
+                  style={{ padding: "12px 16px", borderRadius: 100, border: `1.5px solid ${C.strokeStrong}`, fontFamily: F, fontSize: 14, color: C.textStrong, background: C.background, outline: "none", letterSpacing: "0.3em", textAlign: "center" }}
+                />
+                <button
+                  onClick={handleVerifyCode}
+                  disabled={verifyLoading}
+                  style={{ padding: "14px", borderRadius: 100, border: "none", background: C.primary, color: C.textStrong, fontFamily: F, fontWeight: "700", fontSize: 15, cursor: "pointer" }}
+                >
+                  {verifyLoading ? "Verifying…" : "Verify & save"}
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
