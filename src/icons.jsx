@@ -208,7 +208,7 @@ export const BookmarkIcon = ({ filled = false }) => (
   </svg>
 );
 
-export const CloseIcon = () => (
+export const CloseSmallIcon = () => (
   <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
     <path d="M1 1L9 9M9 1L1 9" stroke="#A69A80" strokeWidth="1.5" strokeLinecap="round"/>
   </svg>
