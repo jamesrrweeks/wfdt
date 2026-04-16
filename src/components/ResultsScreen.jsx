@@ -15,14 +15,7 @@ function PrefPill({ label, onRemove }) {
       fontSize:"14px", lineHeight:"20px", color:C.textStrong, fontFamily:F,
     }}>
       <span>{label}</span>
-      <button
-        onClick={onRemove}
-        style={{
-          background:"none", border:"none", cursor:"pointer",
-          padding:"0", display:"flex", alignItems:"center", justifyContent:"center",
-          width:"20px", height:"20px", color:C.textStrong, fontSize:"16px", lineHeight:"1",
-        }}
-      >✕</button>
+      <button onClick={onRemove} style={{ background:"none", border:"none", cursor:"pointer", padding:"0", display:"flex", alignItems:"center", justifyContent:"center", width:"20px", height:"20px", color:C.textStrong, fontSize:"16px", lineHeight:"1" }}>✕</button>
     </div>
   );
 }
@@ -45,7 +38,7 @@ function buildPills(prefs) {
   return pills;
 }
 
-export default function ResultsScreen({ prefs, meals, onSelect, onBack, onRegenerate, onRemix, isLoading }) {
+export default function ResultsScreen({ prefs, meals, onSelect, onRemix, onBack, onRegenerate, isLoading }) {
   const [cuisine, setCuisine] = useState("Any");
   const [activePills, setActivePills] = useState(() => buildPills(prefs));
 
@@ -59,7 +52,6 @@ export default function ResultsScreen({ prefs, meals, onSelect, onBack, onRegene
       .map(p => p.id);
 
     const updatedPrefs = { ...prefs };
-
     removedIds.forEach(id => {
       if (id === "season")  updatedPrefs.season = null;
       if (id === "people")  updatedPrefs.people = 1;
@@ -79,49 +71,41 @@ export default function ResultsScreen({ prefs, meals, onSelect, onBack, onRegene
         if (updatedPrefs.veg.length === 0) updatedPrefs.veg = ["Any"];
       }
     });
-
     onRegenerate({ ...updatedPrefs, cuisine });
   };
 
   return (
-    <div style={{ paddingBottom:"160px" }}>
+    <div style={{ padding:"80px 8px 160px 16px" }}>
       <style>{`@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
 
       {/* Header */}
-      <div style={{ padding:`${SPACE.xxl}px ${SPACE.s}px ${SPACE.m}px` }}>
-        <button
-          onClick={onBack}
-          style={{
-            background:"none", border:"none", cursor:"pointer",
-            padding:"0 0 12px", color:C.muted,
-            fontFamily:F, fontSize:"14px",
-            display:"flex", alignItems:"center", gap:"4px",
-            textDecoration:"underline",
-          }}
-        >
-          ← Back
-        </button>
-        <h1 style={{ ...T.h1, color:C.textStrong, margin:0 }}>Results</h1>
+      <div style={{ display:"flex", flexDirection:"row", justifyContent:"space-between", alignItems:"center", marginBottom:`${SPACE.m}px` }}>
+        <div style={{ display:"flex", flexDirection:"column", gap:`${SPACE.xs}px` }}>
+          <button onClick={onBack} style={{ background:"none", border:"none", cursor:"pointer", padding:0, display:"flex", alignItems:"center", gap:"4px", fontFamily:F }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7059" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            <span style={{ ...T.tiny, color:C.textWeak, textDecoration:"underline" }}>Back</span>
+          </button>
+          <h1 style={{ ...T.h1, color:C.textStrong, margin:0 }}>Results</h1>
+        </div>
       </div>
 
       {/* Cards */}
-      <div style={{ padding:`0 ${SPACE.s}px`, display:"flex", flexDirection:"column", gap:`${SPACE.m}px` }}>
-       {meals.map((meal, i) => (
-  <MealCard
-    key={meal.id}
-    meal={meal}
-    prefs={prefs}
-    index={i}
-    onView={() => onSelect(meal)}
-    onRemix={() => onRemix(meal)}
-  />
-))}
+      <div style={{ display:"flex", flexDirection:"column", gap:`${SPACE.m}px` }}>
+        {meals.map((meal, i) => (
+          <MealCard
+            key={meal.id}
+            meal={meal}
+            prefs={prefs}
+            index={i}
+            onView={() => onSelect(meal)}
+            onRemix={() => onRemix(meal)}
+          />
+        ))}
       </div>
 
       {/* Footer */}
-      <div style={{ padding:`${SPACE.m}px ${SPACE.s}px 0`, display:"flex", flexDirection:"column", gap:`${SPACE.m}px` }}>
+      <div style={{ paddingTop:`${SPACE.m}px`, display:"flex", flexDirection:"column", gap:`${SPACE.m}px` }}>
 
-        {/* Pref pills */}
         {activePills.length > 0 && (
           <div style={{ display:"flex", flexDirection:"row", flexWrap:"wrap", gap:"8px" }}>
             {activePills.map(pill => (
@@ -130,7 +114,6 @@ export default function ResultsScreen({ prefs, meals, onSelect, onBack, onRegene
           </div>
         )}
 
-        {/* Cuisine chips */}
         <div>
           <div style={{ fontSize:"10px", fontWeight:"700", letterSpacing:"0.1em", textTransform:"uppercase", color:C.muted, fontFamily:F, marginBottom:"12px" }}>
             🍽 Try a cuisine
@@ -142,7 +125,6 @@ export default function ResultsScreen({ prefs, meals, onSelect, onBack, onRegene
           </div>
         </div>
 
-        {/* Generate button */}
         <button
           onClick={handleGenerate}
           disabled={isLoading}
@@ -150,11 +132,9 @@ export default function ResultsScreen({ prefs, meals, onSelect, onBack, onRegene
             width:"100%", height:"65px",
             borderRadius:"32px", border:"none",
             background:isLoading ? C.strokeStrong : C.primary,
-            color:C.textStrong,
-            fontFamily:F, fontSize:"20px", fontWeight:"700",
+            color:C.textStrong, fontFamily:F, fontSize:"20px", fontWeight:"700",
             cursor:isLoading ? "not-allowed" : "pointer",
             display:"flex", alignItems:"center", justifyContent:"center", gap:"8px",
-            transition:"opacity 0.1s",
           }}
         >
           {isLoading
@@ -164,7 +144,6 @@ export default function ResultsScreen({ prefs, meals, onSelect, onBack, onRegene
         </button>
 
       </div>
-
     </div>
   );
 }
