@@ -118,8 +118,7 @@ export default function RecipeScreen({ meal, prefs, onBack }) {
   // ── Render ──────────────────────────────────────────────────────────────────
 
   return (
-    <div style={{ background: C.fill, minHeight: "100vh", paddingBottom: 120 }}>
-
+<div style={{ minHeight: "100vh", paddingBottom: 120 }}>
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: `${SPACE.m}px ${SPACE.s}px ${SPACE.xs}px` }}>
         <button
