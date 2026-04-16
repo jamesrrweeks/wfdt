@@ -195,3 +195,21 @@ export const SubmitIcon = () => (
     <path d="M13.948 9.04249L13.948 20.5834L12.0522 20.5834L12.0522 9.04249L6.74383 14.3508L5.41675 13L13.0001 5.41671L20.5834 13L19.2563 14.3508L13.948 9.04249Z" fill="white"/>
   </svg>
 );
+
+export const BackArrowIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7059" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="15 18 9 12 15 6"/>
+  </svg>
+);
+
+export const BookmarkIcon = ({ filled = false }) => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill={filled ? "#3D331A" : "none"} stroke="#3D331A" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+  </svg>
+);
+
+export const CloseIcon = () => (
+  <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+    <path d="M1 1L9 9M9 1L1 9" stroke="#A69A80" strokeWidth="1.5" strokeLinecap="round"/>
+  </svg>
+);
