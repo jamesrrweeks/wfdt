@@ -52,8 +52,7 @@ export default function PageTemplate({
           paddingTop: `${SPACE.l}px`,
           paddingLeft: `${SPACE.s}px`,
           paddingRight: `${SPACE.s}px`,
-          paddingBottom: "80px",
-        }}>
+          paddingBottom: SPACE.xxl + SPACE.m        }}>
 
           <Header showBack={showBack} onBack={onBack} actions={actions} />
 
