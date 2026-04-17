@@ -19,7 +19,6 @@ export default function VegSelector({ season, onSeasonChange, selected, onChange
   return (
     <div>
       <div style={{ display:"flex", alignItems:"baseline", justifyContent:"space-between", marginBottom:`${SPACE.xs}px` }}>
-        <div style={{ ...T.small, fontWeight:"700", color:C.textStrong }}>Vegetables</div>
         {sel.length>0 && (
           <button onClick={()=>onChange(["Any"])} style={{ background:"none", border:"none", cursor:"pointer", ...T.tiny, color:C.muted, fontFamily:F, textDecoration:"underline" }}>Clear</button>
         )}
