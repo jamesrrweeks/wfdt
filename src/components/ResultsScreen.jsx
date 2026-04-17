@@ -1,10 +1,7 @@
 import { useState } from "react";
 import { C, SPACE, T, F } from "../tokens.js";
 import { SEASON_EMOJI } from "../data.jsx";
-import Chip from "./Chip.jsx";
 import MealCard from "./MealCard.jsx";
-
-const CUISINES = ["Any","Italian","Asian","Mexican","Middle Eastern","Indian","Japanese","French","American","Mediterranean"];
 
 function PrefPill({ label, onRemove }) {
   return (
@@ -39,7 +36,6 @@ function buildPills(prefs) {
 }
 
 export default function ResultsScreen({ prefs, meals, onSelect, onRemix, onBack, onRegenerate, isLoading }) {
-  const [cuisine, setCuisine] = useState("Any");
   const [activePills, setActivePills] = useState(() => buildPills(prefs));
 
   const removePill = (pill) => {
@@ -71,7 +67,7 @@ export default function ResultsScreen({ prefs, meals, onSelect, onRemix, onBack,
         if (updatedPrefs.veg.length === 0) updatedPrefs.veg = ["Any"];
       }
     });
-    onRegenerate({ ...updatedPrefs, cuisine });
+onRegenerate(updatedPrefs);
   };
 
   return (
@@ -87,21 +83,6 @@ export default function ResultsScreen({ prefs, meals, onSelect, onRemix, onBack,
         </div>
       )}
 
-      {/* Cuisine chips */}
-      <div style={{ display:"flex", gap:"8px", overflowX:"auto", scrollbarWidth:"none" }}>
-        {CUISINES.map(c => (
-          <Chip key={c} label={c} selected={cuisine === c} onClick={() => setCuisine(c)} />
-        ))}
-      </div>
-
-      {/* Generate button */}
-      <button
-        onClick={handleGenerate}
-        disabled={isLoading}
-        style={{ width:"100%", background:C.primary, border:"none", borderRadius:"12px", padding:"14px", fontSize:"18px", fontWeight:"700", fontFamily:F, color:C.textStrong, cursor:isLoading ? "not-allowed" : "pointer", opacity:isLoading ? 0.7 : 1 }}
-      >
-        {isLoading ? "Generating…" : "Generate"}
-      </button>
 
       {/* Meal cards */}
       {meals && meals.map(meal => (
@@ -113,6 +94,15 @@ export default function ResultsScreen({ prefs, meals, onSelect, onRemix, onBack,
           onRemix={() => onRemix(meal)}
         />
       ))}
+
+            {/* Generate button */}
+      <button
+        onClick={handleGenerate}
+        disabled={isLoading}
+        style={{ width:"100%", background:C.primary, border:"none", borderRadius:"12px", padding:"14px", fontSize:"18px", fontWeight:"700", fontFamily:F, color:C.textStrong, cursor:isLoading ? "not-allowed" : "pointer", opacity:isLoading ? 0.7 : 1 }}
+      >
+        {isLoading ? "Regenerating…" : "Regenerate"}
+      </button>
     </>
   );
 }
