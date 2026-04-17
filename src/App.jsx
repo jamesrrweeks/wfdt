@@ -92,23 +92,26 @@ export default function App() {
         )}
 
         {screen === "results" && (
-          <>
-            {apiError && (
-              <div style={{ background: "#FFF0ED", borderBottom: "1px solid #F5C2B8", padding: "10px 20px", fontSize: "12px", color: C.red, fontFamily: F }}>
-                ⚠ {apiError}
-              </div>
-            )}
-            <ResultsScreen
-              prefs={prefs}
-              meals={meals}
-              isLoading={isLoading}
-              onSelect={m => { setSelectedMeal(m); setRecipeSaved(false); setScreen("recipe"); }}
-              onRemix={m => { setSelectedMeal(m); }}
-              onBack={() => setScreen("input")}
-              onRegenerate={updatedPrefs => handleGenerate(updatedPrefs)}
-            />
-          </>
-        )}
+  <PageTemplate
+    showBack
+    onBack={() => setScreen("input")}
+    title="Results"
+  >
+    {apiError && (
+      <div style={{ background: "#FFF0ED", borderBottom: "1px solid #F5C2B8", padding: "10px 20px", fontSize: "12px", color: C.red, fontFamily: F }}>
+        ⚠ {apiError}
+      </div>
+    )}
+    <ResultsScreen
+      prefs={prefs}
+      meals={meals}
+      isLoading={isLoading}
+      onSelect={m => { setSelectedMeal(m); setRecipeSaved(false); setScreen("recipe"); }}
+      onRemix={m => { setSelectedMeal(m); }}
+      onRegenerate={updatedPrefs => handleGenerate(updatedPrefs)}
+    />
+  </PageTemplate>
+)}
 
         {screen === "recipe" && selectedMeal && (
           <PageTemplate
