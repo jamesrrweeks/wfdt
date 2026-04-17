@@ -1,59 +1,129 @@
 export function buildPrompt(prefs) {
   const { season, proteins, carbs, veg, calories, macros, people, freeText, cuisine } = prefs;
-  const proteinList = proteins?.filter(s => s !== "Any").join(", ") || "any protein";
-  const carbList    = carbs?.filter(s => s !== "Any").join(", ")    || "any carbs";
-  const vegList     = veg?.filter(s => s !== "Any").join(", ")      || "seasonal vegetables";
-  const freeNote    = freeText?.trim() ? `Extra instructions: ${freeText.trim()}` : "";
-  const cuisineNote = cuisine && cuisine !== "Any" ? `Cuisine style: ${cuisine}.` : "";
+
+  // What the user has explicitly selected (filtering out "Any")
+  const selectedProteins = proteins?.filter(s => s !== "Any") ?? [];
+  const selectedCarbs    = carbs?.filter(s => s !== "Any")    ?? [];
+  const selectedVeg      = veg?.filter(s => s !== "Any")      ?? [];
+
+  const hasProteins = selectedProteins.length > 0;
+  const hasCarbs    = selectedCarbs.length > 0;
+  const hasVeg      = selectedVeg.length > 0;
+
+  // How obligated the AI is scales with how few items were selected
+  const totalSelected = selectedProteins.length + selectedCarbs.length + selectedVeg.length;
+  const obligationNote = totalSelected <= 3
+    ? "The user has selected very few ingredients. Every selected ingredient is important — treat each one as essential and make sure it features prominently in every meal."
+    : totalSelected <= 8
+    ? "Use as many of the selected ingredients as reasonably fit each dish. Aim to cover all of them across the 3 meals."
+    : "The user has provided a large pool of ingredients. Pull the best combination for each meal. You don't need to use all of them in every meal — just make great dishes from what's available.";
+
+  // Constraint block — per category, independently applied  
+  const proteinConstraint = hasProteins
+    ? `PROTEIN — HARD CONSTRAINT: You must only use these proteins: ${selectedProteins.join(", ")}. Do not introduce any other protein. Do not substitute. These must appear in all 3 meals.`
+    : `PROTEIN — You have full creative freedom. Choose proteins that suit the season, the cuisine, and the other ingredients. Do not invent expensive or hard-to-find proteins — stick to common NZ supermarket options.`;
+
+  const carbConstraint = hasCarbs
+    ? `CARBS — HARD CONSTRAINT: You must only use these carbs: ${selectedCarbs.join(", ")}. Do not introduce any other carb base. These must appear in all 3 meals.`
+    : `CARBS — You have full creative freedom. Choose carbs that suit the dish. Prefer pantry staples.`;
+
+  const vegConstraint = hasVeg
+    ? `VEGETABLES — HARD CONSTRAINT: You must only use these vegetables: ${selectedVeg.join(", ")}. Do not introduce other fresh vegetables as a primary component. These must appear in all 3 meals.`
+    : `VEGETABLES — You have full creative freedom. Choose vegetables that are in season in New Zealand right now (${season}). Prioritise what a NZ home cook would realistically find at the supermarket this time of year.`;
+
+  const freeNote    = freeText?.trim() ? `\nExtra instructions from the user: ${freeText.trim()}` : "";
+  const cuisineNote = cuisine && cuisine !== "Any" ? `\nCuisine style: ${cuisine}.` : "";
+
+  // NZ pantry staples — the AI can use any of these freely without selection
+  const pantryNote = `
+NZ PANTRY STAPLES — you may use any of these freely as supporting ingredients:
+Oils & fats: olive oil, sesame oil, butter, coconut oil
+Salt, pepper & sugar: salt, black pepper, white sugar, brown sugar
+Acids: white wine vinegar, rice wine vinegar, balsamic vinegar, lemon juice
+Sauces & condiments: soy sauce, fish sauce, sweet chilli sauce, oyster sauce, tomato paste, Worcestershire sauce, honey, Dijon mustard
+Dry goods: plain flour, cornflour, panko breadcrumbs
+Tins & jars: tinned tomatoes, coconut milk, tinned chickpeas, tinned lentils
+Aromatics: garlic, onion, ginger
+Dried herbs & spices: cumin, paprika, turmeric, dried oregano, chilli flakes, ground coriander, curry powder, cinnamon
+Stock: chicken stock, vegetable stock, beef stock
+Universal perishables: eggs, milk, butter
+Do NOT use ingredients outside this list as pantry items. If something isn't on this list and the user didn't select it, don't include it.`;
+
+  // Household profile — reserved slot, empty for now
+  const profileNote = `
+HOUSEHOLD PROFILE:
+- Dislikes: none
+- Allergies: none
+- Dietary needs: none`;
 
   return `You are a meal planning assistant for New Zealand home cooks. Generate exactly 3 meal ideas as a JSON array.
+
+═══════════════════════════════════════
+HARD CONSTRAINTS — READ BEFORE GENERATING
+═══════════════════════════════════════
+
+${proteinConstraint}
+
+${carbConstraint}
+
+${vegConstraint}
+
+${obligationNote}
+
+NEVER invent a perishable ingredient the user did not select. Proteins, fresh produce, and dairy (except universal perishables listed below) must come from the user's selections only. This rule overrides any creative decision.
+${pantryNote}
+${profileNote}
+${freeNote}
+${cuisineNote}
+
+═══════════════════════════════════════
+OUTPUT FORMAT
+═══════════════════════════════════════
 
 Each meal must include:
 - name (string)
 - description (1 sentence string)
-- icon (string — the single most dominant ingredient in this specific dish, must be exactly one of: "Chicken", "Beef & Lamb", "Seafood", "Vegetarian", "Rice & Grains", "Pasta & Noodles", "Bread & Wraps", "Potato & Root". For example: a beef ragu served on pasta = "Pasta & Noodles", a grilled steak = "Beef & Lamb", a chicken fried rice = "Rice & Grains", a fish taco = "Bread & Wraps")
+- icon (string — the single most dominant ingredient in this specific dish, must be exactly one of: "Chicken", "Beef & Lamb", "Seafood", "Vegetarian", "Rice & Grains", "Pasta & Noodles", "Bread & Wraps", "Potato & Root". Example: beef ragu on pasta = "Pasta & Noodles", grilled steak = "Beef & Lamb", chicken fried rice = "Rice & Grains")
 - cuisine (string — e.g. "Italian", "Japanese", "Mexican")
 - time (string — e.g. "25 mins", "1 hr")
 - difficulty (string — "Easy", "Medium", or "Hard")
 - calories (number — per serving)
-- ingredients (array of objects, scaled for ${people} people — see format below)
-- macros (object with protein, carbs, fat as percentages adding to 100)
-- method (array of 4–5 step strings)
+- ingredients (array — scaled for ${people} people, see format below)
+- macros (object — protein, carbs, fat as percentages adding to 100)
+- method (array of 4–8 step strings)
 
-IMPORTANT — ingredients format:
-Each ingredient must be an object with FOUR fields:
-  { "name": string, "amount": string, "source": "user" | "ai", "suggestions": string[] }
+INGREDIENTS FORMAT:
+Each ingredient must be an object with exactly four fields:
+{ "name": string, "amount": string, "source": "user" | "ai", "suggestions": string[] }
 
-Rules for source tagging:
-- "user" = ingredients the user told you they have. These are: ${proteinList}, ${carbList}, ${vegList}.
-- "ai"   = everything else you are adding (pantry staples, sauces, oils, spices, herbs, stock, etc.)
+SOURCE TAGGING RULES:
+- "user" = the ingredient name directly matches something the user selected. Nothing else qualifies.
+- "ai"   = everything else — pantry staples, universal perishables, seasonal veg chosen by you.
 
-Rules for suggestions:
-- suggestions = an array of 3–4 alternative ingredients that could replace this one in THIS specific recipe.
-- They must make sense in the context of the dish — not just generic swaps.
-- Keep them realistic for a NZ home cook.
-- For user ingredients, suggest protein/carb/veg alternatives.
-- For ai ingredients, suggest pantry alternatives with similar flavour effect.
-
-Example ingredients array:
-[
-  { "name": "Chicken breast", "amount": "600g", "source": "user", "suggestions": ["Tofu", "Salmon fillet", "Chickpeas", "Turkey mince"] },
-  { "name": "Brown rice", "amount": "300g", "source": "user", "suggestions": ["Quinoa", "Cauliflower rice", "Couscous"] },
-  { "name": "Garlic", "amount": "3 cloves", "source": "ai", "suggestions": ["Garlic powder", "Shallots", "Leek"] },
-  { "name": "Olive oil", "amount": "2 tbsp", "source": "ai", "suggestions": ["Avocado oil", "Butter", "Coconut oil"] },
-  { "name": "Soy sauce", "amount": "3 tbsp", "source": "ai", "suggestions": ["Tamari", "Coconut aminos", "Fish sauce"] }
-]
+SUGGESTIONS RULES:
+- 3–4 alternatives that could replace this ingredient in this specific dish
+- Must make sense in context — not generic swaps
+- Realistic for a NZ home cook
+- For "user" ingredients: suggest realistic protein/carb/veg alternatives
+- For "ai" ingredients: suggest pantry alternatives with similar flavour effect
 
 Preferences:
 - Servings: ${people}
-- Protein: ${proteinList}
-- Carbs: ${carbList}
-- Vegetables: ${vegList} (${season} season)
 - Target calories per serving: ${calories} kcal
 - Macro split: ${macros?.protein}% protein, ${macros?.carbs}% carbs, ${macros?.fat}% fat
-${cuisineNote}
-${freeNote}
 
-Only use the proteins, carbs, and vegetables the user has selected. Do not introduce different proteins.
-Return ONLY a valid JSON array, no markdown, no explanation.`;
+═══════════════════════════════════════
+BEFORE RETURNING YOUR RESPONSE
+═══════════════════════════════════════
+
+Check each meal against these questions:
+1. Does every meal include all hard-constrained ingredients?
+2. Have I invented any perishable the user didn't select?
+3. Are all pantry ingredients on the approved staples list?
+4. Is every "source: user" tag a direct match to a user selection?
+5. Do all 3 meals make sense as distinct, enjoyable weeknight dinners?
+
+If any answer is no — fix it before returning.
+
+Return ONLY a valid JSON array. No markdown, no explanation, no preamble.`;
 }
