@@ -1,7 +1,5 @@
 import { useState } from "react";
-import { C, SPACE, T, F, SHADOW } from "../tokens.js";
-import { supabase } from "../supabase.js";
-import { BookmarkIcon } from "../icons.jsx";
+import { C, SPACE, T, F } from "../tokens.js";
 import IngredientTable     from "./IngredientTable.jsx";
 import IngredientSwapModal from "./IngredientSwapModal.jsx";
 import AmountEditModal     from "./AmountEditModal.jsx";
@@ -80,8 +78,7 @@ export default function RecipeScreen({ meal, prefs }) {
   };
 
   return (
-    <div>
-
+    <>
       {/* Ingredients */}
       <div style={{ display: "flex", flexDirection: "column", gap: SPACE.s }}>
         <h2 style={{ ...T.h3, color: C.textStrong, margin: 0 }}>Ingredients</h2>
@@ -159,7 +156,6 @@ export default function RecipeScreen({ meal, prefs }) {
           </div>
         </div>
       )}
-
-    </div>
+    </>
   );
 }
