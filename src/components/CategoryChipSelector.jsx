@@ -32,7 +32,6 @@ export default function CategoryChipSelector({ categories, selected, onChange })
       </div>
       <div style={{
         display:"flex", flexDirection:"column",
-        border:`1px solid ${C.strokeStrong}`,
         borderRadius:"16px", boxShadow:SHADOW.overlay, overflow:"hidden",
       }}>
         <div style={{
