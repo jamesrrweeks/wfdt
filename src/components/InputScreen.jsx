@@ -26,7 +26,7 @@ export default function InputScreen({ onGenerate, isLoading }) {
   return (
     <>
       {/* Serves */}
-      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+      <div style={{ display:"flex", flexDirection:"column", gap:`${SPACE.s}px` }}>
         <div style={{ ...T.h3, color:C.textStrong }}>How many servings?</div>
         <Stepper value={people} min={1} max={8} onChange={setPeople}/>
       </div>
