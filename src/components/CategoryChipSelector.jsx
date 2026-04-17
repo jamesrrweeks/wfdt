@@ -32,11 +32,13 @@ export default function CategoryChipSelector({ categories, selected, onChange })
       </div>
       <div style={{
         display:"flex", flexDirection:"column",
-        background:C.fill, border:`1px solid ${C.strokeStrong}`,
+        border:`1px solid ${C.strokeStrong}`,
         borderRadius:"16px", boxShadow:SHADOW.overlay, overflow:"hidden",
       }}>
         <div style={{
           display:"flex", flexWrap:"wrap",
+          background:C.background,
+          borderRadius:"16px 16px 0px 0px",
           padding:`${SPACE.m}px ${SPACE.s}px`, gap:`${SPACE.xs}px`,
         }}>
           {items.map(item => {
@@ -44,10 +46,10 @@ export default function CategoryChipSelector({ categories, selected, onChange })
             return (
               <button key={item} onClick={() => toggle(item)} style={{
                 display:"flex", justifyContent:"center", alignItems:"center",
-                padding:`${SPACE.xs}px ${SPACE.s}px`, height:"36px",
-                borderRadius:"32px", cursor:"pointer",
-                border:`1px solid ${isS ? C.primary : C.strokeStrong}`,
-                background: isS ? C.primary : C.background,
+                padding:`3px ${SPACE.s}px`, height:"36px",
+                borderRadius:"8px", cursor:"pointer",
+                border:"none",
+                background: isS ? C.primaryMuted : C.strokeWeak,
                 transition:"all 0.12s",
               }}>
                 <span style={{ ...T.tiny, color:C.textStrong, whiteSpace:"nowrap" }}>{item}</span>
@@ -55,7 +57,11 @@ export default function CategoryChipSelector({ categories, selected, onChange })
             );
           })}
         </div>
-        <div style={{ padding:`0px ${SPACE.s}px ${SPACE.s}px` }}>
+        <div style={{
+          background:C.background,
+          borderRadius:"0px 0px 16px 16px",
+          padding:`0px ${SPACE.s}px ${SPACE.s}px`,
+        }}>
           <TypeAheadInput
             placeholder={`Search ${active.toLowerCase()}...`}
             selectedItems={sel}
