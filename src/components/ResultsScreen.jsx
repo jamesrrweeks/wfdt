@@ -75,75 +75,44 @@ export default function ResultsScreen({ prefs, meals, onSelect, onRemix, onBack,
   };
 
   return (
-    <div style={{ padding:"80px 8px 160px 16px" }}>
+    <>
       <style>{`@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
 
-      {/* Header */}
-      <div style={{ display:"flex", flexDirection:"row", justifyContent:"space-between", alignItems:"center", marginBottom:`${SPACE.m}px` }}>
-        <div style={{ display:"flex", flexDirection:"column", gap:`${SPACE.xs}px` }}>
-          <button onClick={onBack} style={{ background:"none", border:"none", cursor:"pointer", padding:0, display:"flex", alignItems:"center", gap:"4px", fontFamily:F }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7059" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-            <span style={{ ...T.tiny, color:C.textWeak, textDecoration:"underline" }}>Back</span>
-          </button>
-          <h1 style={{ ...T.h1, color:C.textStrong, margin:0 }}>Results</h1>
+      {/* Pref pills */}
+      {activePills.length > 0 && (
+        <div style={{ display:"flex", flexWrap:"wrap", gap:"8px" }}>
+          {activePills.map(pill => (
+            <PrefPill key={pill.id} label={pill.label} onRemove={() => removePill(pill)} />
+          ))}
         </div>
-      </div>
+      )}
 
-      {/* Cards */}
-      <div style={{ display:"flex", flexDirection:"column", gap:`${SPACE.m}px` }}>
-        {meals.map((meal, i) => (
-          <MealCard
-            key={meal.id}
-            meal={meal}
-            prefs={prefs}
-            index={i}
-            onView={() => onSelect(meal)}
-            onRemix={() => onRemix(meal)}
-          />
+      {/* Cuisine chips */}
+      <div style={{ display:"flex", gap:"8px", overflowX:"auto", scrollbarWidth:"none" }}>
+        {CUISINES.map(c => (
+          <Chip key={c} label={c} selected={cuisine === c} onClick={() => setCuisine(c)} />
         ))}
       </div>
 
-      {/* Footer */}
-      <div style={{ paddingTop:`${SPACE.m}px`, display:"flex", flexDirection:"column", gap:`${SPACE.m}px` }}>
+      {/* Generate button */}
+      <button
+        onClick={handleGenerate}
+        disabled={isLoading}
+        style={{ width:"100%", background:C.primary, border:"none", borderRadius:"12px", padding:"14px", fontSize:"18px", fontWeight:"700", fontFamily:F, color:C.textStrong, cursor:isLoading ? "not-allowed" : "pointer", opacity:isLoading ? 0.7 : 1 }}
+      >
+        {isLoading ? "Generating…" : "Generate"}
+      </button>
 
-        {activePills.length > 0 && (
-          <div style={{ display:"flex", flexDirection:"row", flexWrap:"wrap", gap:"8px" }}>
-            {activePills.map(pill => (
-              <PrefPill key={pill.id} label={pill.label} onRemove={() => removePill(pill)} />
-            ))}
-          </div>
-        )}
-
-        <div>
-          <div style={{ fontSize:"10px", fontWeight:"700", letterSpacing:"0.1em", textTransform:"uppercase", color:C.muted, fontFamily:F, marginBottom:"12px" }}>
-            🍽 Try a cuisine
-          </div>
-          <div style={{ display:"flex", flexWrap:"wrap", gap:"8px" }}>
-            {CUISINES.map(c => (
-              <Chip key={c} label={c} selected={cuisine===c} onClick={() => setCuisine(c)} />
-            ))}
-          </div>
-        </div>
-
-        <button
-          onClick={handleGenerate}
-          disabled={isLoading}
-          style={{
-            width:"100%", height:"65px",
-            borderRadius:"32px", border:"none",
-            background:isLoading ? C.strokeStrong : C.primary,
-            color:C.textStrong, fontFamily:F, fontSize:"20px", fontWeight:"700",
-            cursor:isLoading ? "not-allowed" : "pointer",
-            display:"flex", alignItems:"center", justifyContent:"center", gap:"8px",
-          }}
-        >
-          {isLoading
-            ? <><span style={{ animation:"spin 1s linear infinite", display:"inline-block" }}>✦</span> Finding ideas...</>
-            : `↻ ${cuisine !== "Any" ? `Regenerate as ${cuisine}` : "Regenerate ideas"}`
-          }
-        </button>
-
-      </div>
-    </div>
+      {/* Meal cards */}
+      {meals && meals.map(meal => (
+        <MealCard
+          key={meal.id}
+          meal={meal}
+          prefs={prefs}
+          onView={() => onSelect(meal)}
+          onRemix={() => onRemix(meal)}
+        />
+      ))}
+    </>
   );
 }
