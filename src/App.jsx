@@ -83,9 +83,11 @@ export default function App() {
     <div style={{ background: C.strokeWeak, minHeight: "100vh", display: "flex", justifyContent: "center", fontFamily: F, overflowY: "scroll" }}>
       <div style={{ width: "390px", minHeight: "100vh", background: C.fill, fontFamily: F }}>
 
-        {screen === "input" && (
-          <InputScreen onGenerate={handleGenerate} isLoading={isLoading} onShowDS={() => setScreen("ds")} />
-        )}
+       {screen === "input" && (
+  <PageTemplate title="What's for dinner tonight?">
+    <InputScreen onGenerate={handleGenerate} isLoading={isLoading} onShowDS={() => setScreen("ds")} />
+  </PageTemplate>
+)}
 
         {screen === "ds" && (
           <DesignSystem onBack={() => setScreen("input")} />
