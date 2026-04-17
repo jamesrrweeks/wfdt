@@ -70,7 +70,6 @@ export default function InputScreen({ onGenerate, isLoading, onShowDS }) {
         transform: "translateX(-50%)",
         width: "390px",
         padding: "12px 20px",
-        background: `linear-gradient(transparent, ${C.fill} 30%)`,
         zIndex: 10,
       }}>
         {(proteins.filter(s=>s!=="Any").length>0 || carbs.filter(s=>s!=="Any").length>0 || veg.filter(s=>s!=="Any").length>0 || freeNotes.length>0) && (
