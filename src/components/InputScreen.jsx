@@ -1,46 +1,24 @@
 import { useState } from "react";
 import { C, SPACE, T, F } from "../tokens.js";
-import { CURRENT_SEASON, PROTEIN_CATEGORIES, CARB_CATEGORIES, DEFAULT_MACROS } from "../data.jsx";
+import { CURRENT_SEASON, PROTEIN_CATEGORIES, CARB_CATEGORIES } from "../data.jsx";
 import CategoryChipSelector from "./CategoryChipSelector.jsx";
 import VegSelector from "./VegSelector.jsx";
-import MacroSelector, { CalorieSlider } from "./MacroSelector.jsx";
 import Stepper from "./Stepper.jsx";
 import AddContext from "./AddContext.jsx";
 
 export default function InputScreen({ onGenerate, isLoading, onShowDS }) {
-  const [season, setSeason]           = useState(CURRENT_SEASON);
-  const [proteins, setProteins]       = useState(["Any"]);
-  const [carbs, setCarbs]             = useState(["Any"]);
-  const [veg, setVeg]                 = useState(["Any"]);
-  const [calories, setCalories]       = useState(500);
-  const [macros, setMacros]           = useState(DEFAULT_MACROS);
-  const [people, setPeople]           = useState(2);
-  const [freeNotes, setFreeNotes]     = useState([]);
-  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [season, setSeason]       = useState(CURRENT_SEASON);
+  const [proteins, setProteins]   = useState(["Any"]);
+  const [carbs, setCarbs]         = useState(["Any"]);
+  const [veg, setVeg]             = useState(["Any"]);
+  const [people, setPeople]       = useState(2);
+  const [freeNotes, setFreeNotes] = useState([]);
 
   const handleSeasonChange = (s) => { setSeason(s); setVeg(["Any"]); };
   const removeFreeNote = (i) => setFreeNotes(prev => prev.filter((_,idx) => idx !== i));
 
   return (
-    <div style={{ padding:"80px 8px 220px 16px" }}>
-      <style>{`
-        @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-        *{box-sizing:border-box} ::-webkit-scrollbar{display:none} input:focus,textarea:focus{outline:none}
-      `}</style>
-
-      {/* Header */}
-      <div style={{ paddingBottom:`${SPACE.m}px`, borderBottom:`1px solid ${C.strokeStrong}` }}>
-        <div style={{ display:"flex", alignItems:"center", gap:`${SPACE.xs}px`, marginBottom:`${SPACE.s}px`, flexWrap:"wrap" }}>
-          <div style={{ display:"inline-flex", alignItems:"center", background:C.primary, borderRadius:"100px", padding:"5px 14px" }}>
-            <span style={{ fontSize:"12px", fontWeight:"700", color:C.textStrong, fontFamily:F }}>✦ AI powered meal generator</span>
-          </div>
-          <button onClick={onShowDS} style={{ display:"inline-flex", alignItems:"center", background:"transparent", border:`1px solid ${C.strokeStrong}`, borderRadius:"100px", padding:"5px 14px", cursor:"pointer" }}>
-            <span style={{ fontSize:"12px", fontWeight:"700", color:C.textStrong, fontFamily:F }}>⬡ Design system</span>
-          </button>
-        </div>
-        <h1 style={{ ...T.h1, color:C.textStrong, margin:0 }}>What's for dinner tonight?</h1>
-      </div>
-
+    <>
       {/* Serves */}
       <div style={{ padding:`${SPACE.m}px 0 ${SPACE.l}px`, borderBottom:`1px solid ${C.strokeStrong}`, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
         <div style={{ ...T.h3, color:C.textStrong }}>How many servings?</div>
@@ -63,26 +41,6 @@ export default function InputScreen({ onGenerate, isLoading, onShowDS }) {
       <div style={{ padding:`${SPACE.m}px 0`, display:"flex", flexDirection:"column", gap:`${SPACE.s}px` }}>
         <div style={{ ...T.h3, color:C.textStrong }}>Vegetables</div>
         <VegSelector season={season} selected={veg} onChange={setVeg} onSeasonChange={handleSeasonChange}/>
-      </div>
-
-      {/* Calories accordion */}
-      <div style={{ borderTop:`1px solid ${C.strokeStrong}`, borderBottom:`1px solid ${C.strokeStrong}` }}>
-        <button onClick={()=>setDetailsOpen(o=>!o)} style={{
-          width:"100%", padding:`${SPACE.m}px 0`, background:"none", border:"none", cursor:"pointer",
-          display:"flex", justifyContent:"space-between", alignItems:"center",
-        }}>
-          <div style={{ display:"flex", alignItems:"center", gap:"10px" }}>
-            <span style={{ ...T.h3, color:C.textStrong }}>Calorie and macro details</span>
-            {!detailsOpen && <span style={{ ...T.tiny, color:C.muted }}>{calories} kcal · {macros.protein}P/{macros.carbs}C/{macros.fat}F</span>}
-          </div>
-          <span style={{ fontSize:"12px", color:C.muted, transition:"transform 0.2s", display:"inline-block", transform:detailsOpen?"rotate(180deg)":"rotate(0deg)" }}>▼</span>
-        </button>
-        {detailsOpen && (
-          <div style={{ display:"flex", flexDirection:"column", gap:`${SPACE.m}px`, paddingBottom:`${SPACE.m}px` }}>
-            <CalorieSlider value={calories} onChange={setCalories}/>
-            <MacroSelector value={macros} onChange={setMacros}/>
-          </div>
-        )}
       </div>
 
       {/* Anything else */}
@@ -138,7 +96,7 @@ export default function InputScreen({ onGenerate, isLoading, onShowDS }) {
           </div>
         )}
         <button
-          onClick={() => onGenerate({ season, proteins, carbs, veg, calories, macros, people, freeText: freeNotes.join(". ") })}
+          onClick={() => onGenerate({ season, proteins, carbs, veg, people, freeText: freeNotes.join(". ") })}
           disabled={isLoading}
           style={{
             width:"100%", height:"65px",
@@ -151,10 +109,10 @@ export default function InputScreen({ onGenerate, isLoading, onShowDS }) {
         >
           {isLoading
             ? <><span style={{ animation:"spin 1s linear infinite", display:"inline-block" }}>✦</span> Finding ideas...</>
-            : "✦ What's for dinner?"
+            : "Generate meal"
           }
         </button>
       </div>
-    </div>
+    </>
   );
 }
