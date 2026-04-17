@@ -2,18 +2,20 @@ import { useState } from "react";
 import { C, F } from "./tokens.js";
 import { buildPrompt } from "./prompt.js";
 import { MOCK_MEALS } from "./data.jsx";
-import InputScreen from "./components/InputScreen.jsx";
+import InputScreen   from "./components/InputScreen.jsx";
 import ResultsScreen from "./components/ResultsScreen.jsx";
-import RecipeScreen from "./components/RecipeScreen.jsx";
-import DesignSystem from "./components/DesignSystem.jsx";
-import BottomNav from "./components/BottomNav.jsx";
+import RecipeScreen  from "./components/RecipeScreen.jsx";
+import DesignSystem  from "./components/DesignSystem.jsx";
+import BottomNav     from "./components/BottomNav.jsx";
+import PageTemplate  from "./components/PageTemplate.jsx";
+import { BookmarkIcon } from "./icons.jsx";
 
 const link = document.createElement("link");
 link.rel = "stylesheet";
 link.href = "https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=Gasoek+One&display=swap";
 document.head.appendChild(link);
 
-const params = new URLSearchParams(window.location.search);
+const params      = new URLSearchParams(window.location.search);
 const devMode     = params.has("dev");
 const resultsMode = params.has("results");
 
@@ -24,6 +26,7 @@ export default function App() {
   const [selectedMeal, setSelectedMeal] = useState(devMode ? MOCK_MEALS[0] : null);
   const [isLoading, setIsLoading]       = useState(false);
   const [apiError, setApiError]         = useState(null);
+  const [recipeSaved, setRecipeSaved]   = useState(false);
 
   const handleGenerate = async (p) => {
     setPrefs(p);
@@ -31,21 +34,21 @@ export default function App() {
     setIsLoading(true);
     try {
       const r = await fetch("/api/generate", {
-        method:"POST",
-        headers:{
-          "Content-Type":"application/json",
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
           "x-secret-token": import.meta.env.VITE_API_SECRET_TOKEN,
         },
-        body:JSON.stringify({
-          model:"claude-sonnet-4-20250514",
-          max_tokens:1500,
-          messages:[{ role:"user", content:buildPrompt(p) }],
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 1500,
+          messages: [{ role: "user", content: buildPrompt(p) }],
         }),
       });
       const d = await r.json();
       const t = d.content[0].text;
-      const c = t.replace(/```json|```/g,"").trim();
-      setMeals(JSON.parse(c).map((m,i) => ({ ...m, id:i+1 })));
+      const c = t.replace(/```json|```/g, "").trim();
+      setMeals(JSON.parse(c).map((m, i) => ({ ...m, id: i + 1 })));
     } catch {
       setApiError("Couldn't connect — showing example meals.");
       setMeals(MOCK_MEALS);
@@ -55,22 +58,31 @@ export default function App() {
     }
   };
 
+  const recipeChips = selectedMeal ? [
+    selectedMeal.cuisine   || null,
+    selectedMeal.time      || null,
+    selectedMeal.calories  ? `${selectedMeal.calories} kcal` : null,
+    prefs?.people          ? `${prefs.people} serves` : null,
+  ].filter(Boolean) : [];
+
   const showNav = screen !== "ds";
 
   return (
-    <div style={{ background:C.strokeWeak, minHeight:"100vh", display:"flex", justifyContent:"center", fontFamily:F, overflowY:"scroll" }}>
-      <div style={{ width:"390px", minHeight:"100vh", background:C.fill, fontFamily:F }}>
+    <div style={{ background: C.strokeWeak, minHeight: "100vh", display: "flex", justifyContent: "center", fontFamily: F, overflowY: "scroll" }}>
+      <div style={{ width: "390px", minHeight: "100vh", background: C.fill, fontFamily: F }}>
 
-        {screen==="input" && (
+        {screen === "input" && (
           <InputScreen onGenerate={handleGenerate} isLoading={isLoading} onShowDS={() => setScreen("ds")} />
         )}
-        {screen==="ds" && (
+
+        {screen === "ds" && (
           <DesignSystem onBack={() => setScreen("input")} />
         )}
-        {screen==="results" && (
+
+        {screen === "results" && (
           <>
             {apiError && (
-              <div style={{ background:"#FFF0ED", borderBottom:"1px solid #F5C2B8", padding:"10px 20px", fontSize:"12px", color:C.red, fontFamily:F }}>
+              <div style={{ background: "#FFF0ED", borderBottom: "1px solid #F5C2B8", padding: "10px 20px", fontSize: "12px", color: C.red, fontFamily: F }}>
                 ⚠ {apiError}
               </div>
             )}
@@ -78,15 +90,32 @@ export default function App() {
               prefs={prefs}
               meals={meals}
               isLoading={isLoading}
-              onSelect={m => { setSelectedMeal(m); setScreen("recipe"); }}
-              onRemix={m => { setSelectedMeal(m); /* RemixModal — coming next */ }}
+              onSelect={m => { setSelectedMeal(m); setRecipeSaved(false); setScreen("recipe"); }}
+              onRemix={m => { setSelectedMeal(m); }}
               onBack={() => setScreen("input")}
               onRegenerate={updatedPrefs => handleGenerate(updatedPrefs)}
             />
           </>
         )}
-        {screen==="recipe" && (
-          <RecipeScreen meal={selectedMeal} prefs={prefs} onBack={() => setScreen("results")} />
+
+        {screen === "recipe" && selectedMeal && (
+          <PageTemplate
+            showBack
+            onBack={() => setScreen("results")}
+            title={selectedMeal.name}
+            chips={recipeChips}
+            actionButtons={[
+              {
+                icon: <BookmarkIcon filled={recipeSaved} />,
+                onPress: () => setRecipeSaved(prev => !prev),
+              }
+            ]}
+          >
+            <RecipeScreen
+              meal={selectedMeal}
+              prefs={prefs}
+            />
+          </PageTemplate>
         )}
 
         {showNav && (
