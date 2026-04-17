@@ -60,7 +60,7 @@ export default function RecipeScreen({ meal, prefs }) {
           "x-secret-token": import.meta.env.VITE_API_SECRET_TOKEN,
         },
         body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
+          model: "claude-sonnet-4-5",
           max_tokens: 1000,
           messages: [{ role: "user", content: `Rewrite the method for "${meal.name}" using these ingredients: ${ingList}. Return only a JSON array of method step strings.` }],
         }),
