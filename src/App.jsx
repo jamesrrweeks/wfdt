@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { C, F } from "./tokens.js";
+import { C, F, SPACE, T } from "./tokens.js";
 import { buildPrompt } from "./prompt.js";
 import { MOCK_MEALS } from "./data.jsx";
 import InputScreen   from "./components/InputScreen.jsx";
@@ -58,12 +58,24 @@ export default function App() {
     }
   };
 
-  const recipeChips = selectedMeal ? [
-    selectedMeal.cuisine   || null,
-    selectedMeal.time      || null,
-    selectedMeal.calories  ? `${selectedMeal.calories} kcal` : null,
-    prefs?.people          ? `${prefs.people} serves` : null,
+  const recipeChipLabels = selectedMeal ? [
+    selectedMeal.cuisine  || null,
+    selectedMeal.time     || null,
+    selectedMeal.calories ? `${selectedMeal.calories} kcal` : null,
+    prefs?.people         ? `${prefs.people} serves` : null,
   ].filter(Boolean) : [];
+
+  const recipeChips = recipeChipLabels.map((label, i) => (
+    <span key={i} style={{
+      background: C.primaryMuted,
+      borderRadius: 8,
+      padding: "3px 16px",
+      ...T.tiny,
+      color: C.textStrong,
+    }}>
+      {label}
+    </span>
+  ));
 
   const showNav = screen !== "ds";
 
@@ -104,7 +116,7 @@ export default function App() {
             onBack={() => setScreen("results")}
             title={selectedMeal.name}
             chips={recipeChips}
-            actionButtons={[
+            actions={[
               {
                 icon: <BookmarkIcon filled={recipeSaved} />,
                 onPress: () => setRecipeSaved(prev => !prev),
