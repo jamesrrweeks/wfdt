@@ -6,7 +6,7 @@ import VegSelector from "./VegSelector.jsx";
 import Stepper from "./Stepper.jsx";
 import AddContext from "./AddContext.jsx";
 
-export default function InputScreen({ onGenerate, isLoading, onShowDS }) {
+export default function InputScreen({ onGenerate, isLoading }) {
   const [season, setSeason]       = useState(CURRENT_SEASON);
   const [proteins, setProteins]   = useState(["Any"]);
   const [carbs, setCarbs]         = useState(["Any"]);
@@ -17,34 +17,40 @@ export default function InputScreen({ onGenerate, isLoading, onShowDS }) {
   const handleSeasonChange = (s) => { setSeason(s); setVeg(["Any"]); };
   const removeFreeNote = (i) => setFreeNotes(prev => prev.filter((_,idx) => idx !== i));
 
+  const selectedPills = [
+    ...proteins.filter(s => s !== "Any").map(item => ({ key: `p-${item}`, label: item, onRemove: () => { const next = proteins.filter(s => s !== item); setProteins(next.length === 0 ? ["Any"] : next); }})),
+    ...carbs.filter(s => s !== "Any").map(item => ({ key: `c-${item}`, label: item, onRemove: () => { const next = carbs.filter(s => s !== item); setCarbs(next.length === 0 ? ["Any"] : next); }})),
+    ...veg.filter(s => s !== "Any").map(item => ({ key: `v-${item}`, label: item, onRemove: () => { const next = veg.filter(s => s !== item); setVeg(next.length === 0 ? ["Any"] : next); }})),
+  ];
+
   return (
     <>
       {/* Serves */}
-      <div style={{ padding:`${SPACE.m}px 0 ${SPACE.l}px`, borderBottom:`1px solid ${C.strokeStrong}`, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
         <div style={{ ...T.h3, color:C.textStrong }}>How many servings?</div>
         <Stepper value={people} min={1} max={8} onChange={setPeople}/>
       </div>
 
       {/* Protein */}
-      <div style={{ padding:`${SPACE.m}px 0`, display:"flex", flexDirection:"column", gap:`${SPACE.s}px` }}>
+      <div style={{ display:"flex", flexDirection:"column", gap:`${SPACE.s}px` }}>
         <div style={{ ...T.h3, color:C.textStrong }}>Protein</div>
         <CategoryChipSelector categories={PROTEIN_CATEGORIES} selected={proteins} onChange={setProteins} />
       </div>
 
-      {/* Carbs */}
-      <div style={{ padding:`${SPACE.m}px 0`, display:"flex", flexDirection:"column", gap:`${SPACE.s}px` }}>
-        <div style={{ ...T.h3, color:C.textStrong }}>Carbs</div>
-        <CategoryChipSelector categories={CARB_CATEGORIES} selected={carbs} onChange={setCarbs} />
-      </div>
-
       {/* Veg */}
-      <div style={{ padding:`${SPACE.m}px 0`, display:"flex", flexDirection:"column", gap:`${SPACE.s}px` }}>
+      <div style={{ display:"flex", flexDirection:"column", gap:`${SPACE.s}px` }}>
         <div style={{ ...T.h3, color:C.textStrong }}>Vegetables</div>
         <VegSelector season={season} selected={veg} onChange={setVeg} onSeasonChange={handleSeasonChange}/>
       </div>
 
+      {/* Carbs */}
+      <div style={{ display:"flex", flexDirection:"column", gap:`${SPACE.s}px` }}>
+        <div style={{ ...T.h3, color:C.textStrong }}>Carbs</div>
+        <CategoryChipSelector categories={CARB_CATEGORIES} selected={carbs} onChange={setCarbs} />
+      </div>
+
       {/* Anything else */}
-      <div style={{ padding:`${SPACE.m}px 0 ${SPACE.l}px`, display:"flex", flexDirection:"column", gap:`${SPACE.s}px` }}>
+      <div style={{ display:"flex", flexDirection:"column", gap:`${SPACE.s}px` }}>
         <div style={{ ...T.h3, color:C.textStrong }}>Anything else?</div>
         <AddContext
           onAdd={(note) => { const v=note.trim(); if(v) setFreeNotes(prev=>[...prev,v]); }}
@@ -62,34 +68,14 @@ export default function InputScreen({ onGenerate, isLoading, onShowDS }) {
         )}
       </div>
 
-      {/* Sticky footer */}
-      <div style={{
-        position: "fixed",
-        bottom: 85,
-        left: "50%",
-        transform: "translateX(-50%)",
-        width: "390px",
-        padding: "12px 20px",
-        zIndex: 10,
-      }}>
-        {(proteins.filter(s=>s!=="Any").length>0 || carbs.filter(s=>s!=="Any").length>0 || veg.filter(s=>s!=="Any").length>0 || freeNotes.length>0) && (
-          <div style={{ display:"flex", flexWrap:"wrap", gap:`${SPACE.xs}px`, marginBottom:"10px" }}>
-            {proteins.filter(s=>s!=="Any").map(item=>(
-              <button key={`p-${item}`} onClick={()=>{const next=proteins.filter(s=>s!==item);setProteins(next.length===0?["Any"]:next);}}
+      {/* Generate */}
+      <div style={{ display:"flex", flexDirection:"column", gap:`${SPACE.s}px` }}>
+        {selectedPills.length > 0 && (
+          <div style={{ display:"flex", flexWrap:"wrap", gap:`${SPACE.xs}px` }}>
+            {selectedPills.map(pill => (
+              <button key={pill.key} onClick={pill.onRemove}
                 style={{ padding:"5px 11px", borderRadius:"100px", border:"none", background:C.pill, color:C.pillText, fontSize:"12px", fontFamily:F, fontWeight:"600", cursor:"pointer", display:"flex", alignItems:"center", gap:"5px" }}>
-                {item} <span style={{ opacity:0.5, fontSize:"10px" }}>✕</span>
-              </button>
-            ))}
-            {carbs.filter(s=>s!=="Any").map(item=>(
-              <button key={`c-${item}`} onClick={()=>{const next=carbs.filter(s=>s!==item);setCarbs(next.length===0?["Any"]:next);}}
-                style={{ padding:"5px 11px", borderRadius:"100px", border:"none", background:C.pill, color:C.pillText, fontSize:"12px", fontFamily:F, fontWeight:"600", cursor:"pointer", display:"flex", alignItems:"center", gap:"5px" }}>
-                {item} <span style={{ opacity:0.5, fontSize:"10px" }}>✕</span>
-              </button>
-            ))}
-            {veg.filter(s=>s!=="Any").map(item=>(
-              <button key={`v-${item}`} onClick={()=>{const next=veg.filter(s=>s!==item);setVeg(next.length===0?["Any"]:next);}}
-                style={{ padding:"5px 11px", borderRadius:"100px", border:"none", background:C.pill, color:C.pillText, fontSize:"12px", fontFamily:F, fontWeight:"600", cursor:"pointer", display:"flex", alignItems:"center", gap:"5px" }}>
-                {item} <span style={{ opacity:0.5, fontSize:"10px" }}>✕</span>
+                {pill.label} <span style={{ opacity:0.5, fontSize:"10px" }}>✕</span>
               </button>
             ))}
           </div>
