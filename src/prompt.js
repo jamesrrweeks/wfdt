@@ -82,7 +82,7 @@ OUTPUT FORMAT
 
 Each meal must include:
 - name (string)
-- description (1-2 sentence string)
+- description (1 sentence string)
 - icon (string — the single most dominant ingredient or character of this specific dish. 
 Must be exactly one of: "Chicken", "Beef & Lamb", "Seafood", "Vegetarian", 
 "Rice & Grains", "Pasta & Noodles", "Bread & Wraps", "Potato & Root".
