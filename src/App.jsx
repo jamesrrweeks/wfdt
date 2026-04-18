@@ -34,6 +34,7 @@ export default function App() {
   const [isLoading, setIsLoading]       = useState(false);
   const [apiError, setApiError]         = useState(null);
   const [recipeSaved, setRecipeSaved]   = useState(false);
+  const [previousScreen, setPreviousScreen] = useState("results");
 
   const handleGenerate = async (p) => {
     setPrefs(p);
@@ -115,7 +116,7 @@ return (
       prefs={prefs}
       meals={meals}
       isLoading={isLoading}
-      onSelect={m => { setSelectedMeal(m); setRecipeSaved(false); setScreen("recipe"); }}
+onSelect={m => { setSelectedMeal(m); setRecipeSaved(false); setPreviousScreen("results"); setScreen("recipe"); }}      
       onRemix={m => { setSelectedMeal(m); }}
       onRegenerate={updatedPrefs => handleGenerate(updatedPrefs)}
     />
@@ -125,7 +126,7 @@ return (
         {screen === "recipe" && selectedMeal && (
           <PageTemplate
             showBack
-            onBack={() => setScreen("results")}
+onBack={() => setScreen(previousScreen)}
             title={selectedMeal.name}
             chips={recipeChips}
             actions={[
@@ -158,7 +159,7 @@ return (
     ]}
   >
     <MyRecipesScreen
-      onSelect={m => { setSelectedMeal(m); setRecipeSaved(false); setScreen("recipe"); }}
+onSelect={m => { setSelectedMeal(m); setRecipeSaved(false); setPreviousScreen("myrecipes"); setScreen("recipe"); }}
       onRemix={m => { setSelectedMeal(m); }}
     />
   </PageTemplate>
