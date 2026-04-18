@@ -9,6 +9,7 @@ import DesignSystem  from "./components/DesignSystem.jsx";
 import BottomNav     from "./components/BottomNav.jsx";
 import PageTemplate  from "./components/PageTemplate.jsx";
 import { BookmarkIcon } from "./icons.jsx";
+import LoadingScreen  from "./components/LoadingScreen.jsx";
 
 const link = document.createElement("link");
 link.rel = "stylesheet";
@@ -77,13 +78,14 @@ export default function App() {
     </span>
   ));
 
-  const showNav = screen !== "ds";
-
+const showNav = screen !== "ds" && !isLoading;
+  
   return (
     <div style={{ background: C.strokeWeak, minHeight: "100vh", display: "flex", justifyContent: "center", fontFamily: F, overflowY: "scroll" }}>
       <div style={{ width: "390px", minHeight: "100vh", background: C.fill, fontFamily: F }}>
 
-       {screen === "input" && (
+       {isLoading && <LoadingScreen />}
+        {screen === "input" && (
   <PageTemplate title="What's for dinner tonight?">
     <InputScreen onGenerate={handleGenerate} isLoading={isLoading} onShowDS={() => setScreen("ds")} />
   </PageTemplate>
