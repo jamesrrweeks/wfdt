@@ -122,15 +122,6 @@ async function handleVerify() {
     setLoading(false);
     if (err) { setError(err.message); return; }
 
-    // Explicitly set the session so the Supabase client is authenticated
-    // before we attempt any database writes
-    if (data.session) {
-      await supabase.auth.setSession({
-        access_token:  data.session.access_token,
-        refresh_token: data.session.refresh_token,
-      });
-    }
-
     setVerifiedUser(data.user);
     setStage("success");
     onSuccess?.(data.user);
