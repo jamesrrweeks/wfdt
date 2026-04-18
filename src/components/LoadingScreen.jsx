@@ -105,14 +105,14 @@ export default function LoadingScreen() {
           width: 0;
           background: #CDEA45;
           border-radius: 99px;
-          animation: fillBar 30s linear forwards;
+          animation: fillBar 40s linear forwards;
         }
 
        @keyframes fillBar {
   0%  { width: 0%; }
   60% { width: 75%; }
   85% { width: 88%; }
-  100% { width: 93%; }
+  100% { width: 95%; }
 }
 
         @keyframes fadeIn {
@@ -140,6 +140,7 @@ function CopyRotator() {
     "Finding what's in season…",
     "Checking your pantry…",
     "Writing your recipes…",
+    "Coming up with ingredient alternatives..."
     "Almost there…",
   ];
 
