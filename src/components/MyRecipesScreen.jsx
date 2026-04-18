@@ -1,5 +1,7 @@
 import { C, SPACE, T } from "../tokens.js";
 import MealCard from "./MealCard.jsx";
+import { useState, useEffect } from "react";
+import { supabase } from "../supabase.js";
 
 const MOCK_SAVED = [
   {
@@ -42,7 +44,6 @@ function EmptyState() {
       padding: `${SPACE.xxl}px 0`,
       textAlign: "center",
     }}>
-      <span style={{ fontSize: "48px" }}>🔖</span>
       <p style={{ ...T.small, color: C.textWeak }}>
         Your saved recipes will live here. Generate a meal and tap the bookmark to save it or add a recipe.
       </p>
@@ -50,21 +51,52 @@ function EmptyState() {
   );
 }
 
-export default function MyRecipesScreen({ onSelect, onRemix }) {
-  const recipes = [];
+function LoadingState() {
+  return (
+    <div style={{
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: `${SPACE.xxl}px 0`,
+    }}>
+      <p style={{ ...T.small, color: C.textWeak }}>Loading your recipes…</p>
+    </div>
+  );
+}
 
+export default function MyRecipesScreen({ user, onSelect, onRemix }) {
+  const [recipes, setRecipes] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user?.id) { setLoading(false); return; }
+    async function fetchRecipes() {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("recipes")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+      if (error) { console.error("Failed to load recipes:", error); setRecipes([]); }
+      else { setRecipes(data ?? []); }
+      setLoading(false);
+    }
+    fetchRecipes();
+  }, [user?.id]);
+
+  if (loading) return <LoadingState />;
   if (recipes.length === 0) return <EmptyState />;
 
   return (
     <>
-      {recipes.map((meal, i) => (
+      {recipes.map((row, i) => (
         <MealCard
-          key={meal.id}
-          meal={meal}
+          key={row.id}
+          meal={row.meal_data}
           prefs={null}
           index={i}
-          onRemix={() => onRemix?.(meal)}
-          onView={() => onSelect?.(meal)}
+          onRemix={() => onRemix?.(row.meal_data)}
+          onView={() => onSelect?.(row.meal_data)}
         />
       ))}
     </>
