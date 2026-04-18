@@ -140,7 +140,7 @@ function CopyRotator() {
     "Finding what's in season…",
     "Checking your pantry…",
     "Writing your recipes…",
-    "Coming up with ingredient alternatives..."
+    "Coming up with ingredient alternatives...",
     "Almost there…",
   ];
 
