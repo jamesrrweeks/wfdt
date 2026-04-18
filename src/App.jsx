@@ -51,8 +51,9 @@ useEffect(() => {
   return () => subscription.unsubscribe();
 }, []);
 
-async function handleBookmarkPress() {
-  if (!user) { setAuthReason("save"); setShowAuth(true); return; }
+async function handleBookmarkPress(freshUser) {
+  const activeUser = freshUser || user;
+  if (!activeUser) { setAuthReason("save"); setShowAuth(true); return; }
   if (recipeSaved) return;
 
   const ingredientNames = (selectedMeal.ingredients || [])
@@ -66,7 +67,7 @@ async function handleBookmarkPress() {
   ].filter(Boolean).join(" ").toLowerCase();
 
   const { error } = await supabase.from("recipes").insert({
-    user_id:     user.id,
+    user_id:     activeUser.id,
     name:        selectedMeal.name,
     icon:        selectedMeal.icon,
     cuisine:     selectedMeal.cuisine,
@@ -91,13 +92,14 @@ function handleProfileNav() {
   else { setAuthReason("profile"); setShowAuth(true); }
 }
 
-async function handleAuthSuccess() {
-  if (authReason === "save") { setShowAuth(false); await handleBookmarkPress(); }
+async function handleAuthSuccess(freshUser) {
+  if (authReason === "save") { setShowAuth(false); await handleBookmarkPress(freshUser); }
   if (authReason === "myrecipes") { setShowAuth(false); setScreen("myrecipes"); }
   if (authReason === "profile") { setShowAuth(false); }
 }
 
-function handleViewSaved() {
+async function handleViewSaved(freshUser) {
+  await handleBookmarkPress(freshUser);
   setShowAuth(false);
   setScreen("myrecipes");
 }
