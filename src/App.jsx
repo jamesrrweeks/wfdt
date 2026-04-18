@@ -101,7 +101,7 @@ function handleProfileNav() {
 }
 
 async function handleAuthSuccess(freshUser) {
-  if (authReason === "save") { setShowAuth(false); await handleBookmarkPress(freshUser); }
+  if (authReason === "save") { await handleBookmarkPress(freshUser); }
   if (authReason === "myrecipes") { setShowAuth(false); setScreen("myrecipes"); }
   if (authReason === "profile") { setShowAuth(false); }
 }
