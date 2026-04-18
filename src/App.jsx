@@ -53,8 +53,8 @@ useEffect(() => {
 
 async function handleBookmarkPress(freshUser) {
   const activeUser = freshUser || user;
+  console.log("activeUser:", activeUser);
   if (!activeUser) { setAuthReason("save"); setShowAuth(true); return; }
-  if (recipeSaved) return;
 
   const ingredientNames = (selectedMeal.ingredients || [])
     .map(i => i.name).join(" ");
