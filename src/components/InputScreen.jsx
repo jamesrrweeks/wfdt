@@ -50,8 +50,8 @@ export default function InputScreen({ onGenerate, isLoading }) {
       </div>
 
       {/* Anything else */}
-      <div style={{ display:"flex", flexDirection:"column", gap:`${SPACE.s}px` }}>
-        <div style={{ ...T.h3, color:C.textStrong }}>Anything else?</div>
+      <div style={{ display:"flex", flexDirection:"column", gap:`${SPACE.s}px`, paddingBottom:`${SPACE.xxl + SPACE.xxl}px` }}>
+  <div style={{ ...T.h3, color:C.textStrong }}>Anything else?</div>
         <AddContext
           onAdd={(note) => { const v=note.trim(); if(v) setFreeNotes(prev=>[...prev,v]); }}
           placeholder="e.g. nothing spicy, use up leftovers, allergic to nuts…"
@@ -68,9 +68,19 @@ export default function InputScreen({ onGenerate, isLoading }) {
         )}
       </div>
 
-      {/* Generate */}
-      <div style={{ display:"flex", flexDirection:"column", gap:`${SPACE.s}px` }}>
-        {selectedPills.length > 0 && (
+{/* Generate — sticky footer */}
+<div style={{
+  position:      "fixed",
+  bottom:        `${SPACE.xl + SPACE.s}px`,
+  left:          "50%",
+  transform:     "translateX(-50%)",
+  width:         "390px",
+  padding:       `${SPACE.s}px`,
+  display:       "flex",
+  flexDirection: "column",
+  gap:           `${SPACE.xs}px`,
+  zIndex:        50,
+}}>        {selectedPills.length > 0 && (
           <div style={{ display:"flex", flexWrap:"wrap", gap:`${SPACE.xs}px` }}>
             {selectedPills.map(pill => (
               <button key={pill.key} onClick={pill.onRemove}
