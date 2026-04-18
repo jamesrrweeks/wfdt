@@ -1,4 +1,4 @@
-import { C, SPACE, T, F } from "../tokens.js";
+import { C, SPACE, T } from "../tokens.js";
 import MealCard from "./MealCard.jsx";
 
 const MOCK_SAVED = [
@@ -44,14 +44,14 @@ function EmptyState() {
     }}>
       <span style={{ fontSize: "48px" }}>🔖</span>
       <p style={{ ...T.small, color: C.textWeak }}>
-        Nothing saved yet.<br />Generate a meal to get started.
+        Your saved recipes will live here. Generate a meal and tap the bookmark to save it or add a recipe.
       </p>
     </div>
   );
 }
 
 export default function MyRecipesScreen({ onSelect, onRemix }) {
-  const recipes = MOCK_SAVED;
+  const recipes = [];
 
   if (recipes.length === 0) return <EmptyState />;
 
