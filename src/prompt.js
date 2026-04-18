@@ -82,19 +82,33 @@ OUTPUT FORMAT
 
 Each meal must include:
 - name (string)
-- description (1 sentence string)
-- icon (string — the single most dominant ingredient in this specific dish, must be exactly one of: "Chicken", "Beef & Lamb", "Seafood", "Vegetarian", "Rice & Grains", "Pasta & Noodles", "Bread & Wraps", "Potato & Root". Example: beef ragu on pasta = "Pasta & Noodles", grilled steak = "Beef & Lamb", chicken fried rice = "Rice & Grains")
+- description (1-2 sentence string)
+- icon (string — the single most dominant ingredient or character of this specific dish. 
+Must be exactly one of: "Chicken", "Beef & Lamb", "Seafood", "Vegetarian", 
+"Rice & Grains", "Pasta & Noodles", "Bread & Wraps", "Potato & Root".
+The dominant element could be the protein, the carb base, or even a seasonal vegetable 
+if it defines the dish. Example: beef ragu on pasta = "Pasta & Noodles", grilled steak = 
+"Beef & Lamb", chicken fried rice = "Rice & Grains", pumpkin soup = "Potato & Root".
+IMPORTANT: All 3 meals must have different icons. If you find yourself repeating an icon, 
+rethink that meal so it has a different dominant character.)
 - cuisine (string — e.g. "Italian", "Japanese", "Mexican")
 - time (string — e.g. "25 mins", "1 hr")
-- difficulty (string — "Easy", "Medium", or "Hard")
 - calories (number — per serving)
 - ingredients (array — scaled for ${people} people, see format below)
 - macros (object — protein, carbs, fat as percentages adding to 100)
-- method (array of 4–8 step strings)
+- method (array of 4–8 step strings) 
+Method steps must cover all ingredient preparation — 
+how to cut, peel, trim, or prep each ingredient before cooking.
 
 INGREDIENTS FORMAT:
 Each ingredient must be an object with exactly four fields:
 { "name": string, "amount": string, "source": "user" | "ai", "suggestions": string[] }
+
+AMOUNT FIELD RULE: amount must contain a number and unit only. 
+No preparation instructions. No descriptors. 
+Correct: "1 kg", "6 cloves", "400 ml"
+Wrong: "1 kg, cut into chunks", "6 cloves, whole", "400 ml, warmed"
+All preparation instructions belong in the method steps.
 
 SOURCE TAGGING RULES:
 - "user" = the ingredient name directly matches something the user selected. Nothing else qualifies.
@@ -122,6 +136,8 @@ Check each meal against these questions:
 3. Are all pantry ingredients on the approved staples list?
 4. Is every "source: user" tag a direct match to a user selection?
 5. Do all 3 meals make sense as distinct, enjoyable weeknight dinners?
+6. Do all 3 meals have different icons?
+
 
 If any answer is no — fix it before returning.
 
