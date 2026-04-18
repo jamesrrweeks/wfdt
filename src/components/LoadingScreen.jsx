@@ -105,14 +105,15 @@ export default function LoadingScreen() {
           width: 0;
           background: #CDEA45;
           border-radius: 99px;
-          animation: fillBar 20s linear forwards;
+          animation: fillBar 30s linear forwards;
         }
 
-        @keyframes fillBar {
-          0%  { width: 0%; }
-          80% { width: 85%; }
-          100% { width: 92%; }
-        }
+       @keyframes fillBar {
+  0%  { width: 0%; }
+  60% { width: 75%; }
+  85% { width: 88%; }
+  100% { width: 93%; }
+}
 
         @keyframes fadeIn {
           from { opacity: 0; }
