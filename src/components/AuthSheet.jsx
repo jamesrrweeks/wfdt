@@ -110,20 +110,30 @@ const [verifiedUser, setVerifiedUser] = useState(null);
     setStage("otp");
   }
 
-  async function handleVerify() {
+async function handleVerify() {
     if (!code.trim()) return;
     setLoading(true);
     setError("");
     const { data, error: err } = await supabase.auth.verifyOtp({
-  email: email.trim(),
-  token: code.trim(),
-  type: "email",
-});
-setLoading(false);
-if (err) { setError(err.message); return; }
-setVerifiedUser(data.user);
-setStage("success");
-onSuccess?.(data.user);
+      email: email.trim(),
+      token: code.trim(),
+      type: "email",
+    });
+    setLoading(false);
+    if (err) { setError(err.message); return; }
+
+    // Explicitly set the session so the Supabase client is authenticated
+    // before we attempt any database writes
+    if (data.session) {
+      await supabase.auth.setSession({
+        access_token:  data.session.access_token,
+        refresh_token: data.session.refresh_token,
+      });
+    }
+
+    setVerifiedUser(data.user);
+    setStage("success");
+    onSuccess?.(data.user);
   }
 
   // ── Render ─────────────────────────────────────────────────────
