@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react"; 
+import { supabase } from "./supabase.js";
+import AuthSheet from "./components/AuthSheet.jsx";
 import { C, F, SPACE, T } from "./tokens.js";
 import { buildPrompt } from "./prompt.js";
 import { MOCK_MEALS } from "./data.jsx";
@@ -35,6 +37,45 @@ export default function App() {
   const [apiError, setApiError]         = useState(null);
   const [recipeSaved, setRecipeSaved]   = useState(false);
   const [previousScreen, setPreviousScreen] = useState("results");
+  const [user, setUser]             = useState(null);
+const [showAuth, setShowAuth]     = useState(false);
+const [authReason, setAuthReason] = useState("save");
+
+useEffect(() => {
+  supabase.auth.getSession().then(({ data: { session } }) => {
+    setUser(session?.user ?? null);
+  });
+  const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    setUser(session?.user ?? null);
+  });
+  return () => subscription.unsubscribe();
+}, []);
+
+function handleBookmarkPress() {
+  if (user) { setRecipeSaved(prev => !prev); }
+  else { setAuthReason("save"); setShowAuth(true); }
+}
+
+function handleMyRecipesNav() {
+  if (user) { setScreen("myrecipes"); }
+  else { setAuthReason("myrecipes"); setShowAuth(true); }
+}
+
+function handleProfileNav() {
+  if (user) { setScreen("profile"); }
+  else { setAuthReason("profile"); setShowAuth(true); }
+}
+
+function handleAuthSuccess() {
+  if (authReason === "save") { setRecipeSaved(true); }
+  if (authReason === "myrecipes") { setShowAuth(false); setScreen("myrecipes"); }
+  if (authReason === "profile") { setShowAuth(false); }
+}
+
+function handleViewSaved() {
+  setShowAuth(false);
+  setScreen("myrecipes");
+}
 
   const handleGenerate = async (p) => {
     setPrefs(p);
@@ -90,7 +131,15 @@ const showNav = screen !== "ds" && !isLoading;
 return (
     <div style={{ background: C.strokeWeak, minHeight: "100vh", display: "flex", justifyContent: "center", fontFamily: F, overflowY: "scroll" }}>
       <div style={{ width: "390px", minHeight: "100vh", background: C.fill, fontFamily: F }}>
-       {isLoading && <LoadingScreen />}
+       {showAuth && (
+  <AuthSheet
+    reason={authReason}
+    onSuccess={handleAuthSuccess}
+    onViewSaved={handleViewSaved}
+    onClose={() => setShowAuth(false)}
+  />
+)}
+        {isLoading && <LoadingScreen />}
         {!isLoading && screen === "input" && (
   <PageTemplate title="What's for dinner tonight?">
     <InputScreen onGenerate={handleGenerate} isLoading={isLoading} onShowDS={() => setScreen("ds")} />
@@ -132,7 +181,7 @@ onBack={() => setScreen(previousScreen)}
             actions={[
               {
                 icon: <BookmarkIcon filled={recipeSaved} />,
-                onPress: () => setRecipeSaved(prev => !prev),
+                onPress: handleBookmarkPress,
               }
             ]}
           >
@@ -169,8 +218,9 @@ onSelect={m => { setSelectedMeal(m); setRecipeSaved(false); setPreviousScreen("m
           <BottomNav
             active={screen === "myrecipes" ? "myrecipes" : "home"}
             onHome={() => setScreen("input")}
-            onMyRecipes={() => setScreen("myrecipes")}
-            onProfile={() => {}}
+            onMyRecipes={handleMyRecipesNav}
+            onProfile={handleProfileNav}
+
           />
         )}
 
