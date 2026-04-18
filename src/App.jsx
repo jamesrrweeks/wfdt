@@ -10,11 +10,17 @@ import BottomNav     from "./components/BottomNav.jsx";
 import PageTemplate  from "./components/PageTemplate.jsx";
 import { BookmarkIcon } from "./icons.jsx";
 import LoadingScreen  from "./components/LoadingScreen.jsx";
+import MyRecipesScreen from "./components/MyRecipesScreen.jsx";
 
 const link = document.createElement("link");
 link.rel = "stylesheet";
 link.href = "https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=Gasoek+One&display=swap";
 document.head.appendChild(link);
+
+const iconsLink = document.createElement("link");
+iconsLink.rel = "stylesheet";
+iconsLink.href = "https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,100..700,0..1,0";
+document.head.appendChild(iconsLink);
 
 const params      = new URLSearchParams(window.location.search);
 const devMode     = params.has("dev");
@@ -135,6 +141,28 @@ return (
             />
           </PageTemplate>
         )}
+
+        {screen === "myrecipes" && (
+  <PageTemplate
+    title="My recipes"
+    actions={[
+      {
+        icon: <span className="material-symbols-outlined" style={{ fontSize:"24px", fontVariationSettings:"'FILL' 1, 'wght' 500", color: C.textStrong }}>search</span>,
+        onPress: () => {},
+      },
+      {
+        icon: <span className="material-symbols-outlined" style={{ fontSize:"24px", fontVariationSettings:"'FILL' 1, 'wght' 500", color: C.textStrong }}>add</span>,
+        onPress: () => {},
+        variant: "primary",
+      },
+    ]}
+  >
+    <MyRecipesScreen
+      onSelect={m => { setSelectedMeal(m); setRecipeSaved(false); setScreen("recipe"); }}
+      onRemix={m => { setSelectedMeal(m); }}
+    />
+  </PageTemplate>
+)}
 
         {showNav && (
           <BottomNav
