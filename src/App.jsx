@@ -53,8 +53,12 @@ useEffect(() => {
 
 async function handleBookmarkPress(freshUser) {
   const activeUser = freshUser || user;
-  console.log("activeUser:", activeUser);
   if (!activeUser) { setAuthReason("save"); setShowAuth(true); return; }
+
+  // 🔍 DIAGNOSTIC — remove after fix
+  const { data: sessionData } = await supabase.auth.getSession();
+  console.log("activeUser.id:", activeUser.id);
+  console.log("session at insert time:", sessionData?.session);
 
   const ingredientNames = (selectedMeal.ingredients || [])
     .map(i => i.name).join(" ");
@@ -78,7 +82,7 @@ async function handleBookmarkPress(freshUser) {
     search_text: searchText,
   });
 
-  if (error) { console.error("Save failed:", error); return; }
+  if (error) { console.error("Save failed — full error:", JSON.stringify(error, null, 2)); return; }
   setRecipeSaved(true);
 }
 
