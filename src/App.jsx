@@ -53,12 +53,16 @@ useEffect(() => {
 
 async function handleBookmarkPress(freshUser) {
   const activeUser = freshUser || user;
-  if (!activeUser) { setAuthReason("save"); setShowAuth(true); return; }
+  if (!activeUser?.id) { setAuthReason("save"); setShowAuth(true); return; }
 
-  // 🔍 DIAGNOSTIC — remove after fix
   const { data: sessionData } = await supabase.auth.getSession();
-  console.log("activeUser.id:", activeUser.id);
   console.log("session at insert time:", sessionData?.session);
+  if (!sessionData?.session) {
+    setUser(null);
+    setAuthReason("save");
+    setShowAuth(true);
+    return;
+  }
 
   const ingredientNames = (selectedMeal.ingredients || [])
     .map(i => i.name).join(" ");
