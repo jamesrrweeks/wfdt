@@ -13,7 +13,7 @@ export default function RegenerateBar({ visible, loading, onRegenerate }) {
   return (
     <div style={{
       position:      "fixed",
-      bottom:        0,
+      bottom:        SPACE.xxl,      
       left:          "50%",
       transform:     "translateX(-50%)",
       width:         "390px",
