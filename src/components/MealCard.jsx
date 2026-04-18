@@ -95,30 +95,30 @@ export default function MealCard({ meal, prefs, index = 0, onRemix, onView }) {
       </div>
 
       {/* Actions */}
-      <div style={{ display:"flex", gap:`${SPACE.xs}px`, width:"100%" }}>
-        <button onClick={onRemix} style={{
-          flex: 1, height: "36px",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          padding: "8px 16px",
-          background: C.background,
-          border: `1px solid ${C.strokeStrong}`,
-          borderRadius: "32px",
-          ...T.tiny, color: C.textStrong,
-          cursor: "pointer",
-          fontFamily: F,
-        }}>Remix</button>
-        <button onClick={onView} style={{
-          flex: 1, height: "36px",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          padding: "8px 16px",
-          background: C.textStrong,
-          border: `1px solid ${C.textStrong}`,
-          borderRadius: "32px",
-          ...T.tiny, color: C.background,
-          cursor: "pointer",
-          fontFamily: F,
-        }}>View recipe</button>
-      </div>
+<div style={{ display:"flex", gap:`${SPACE.xs}px`, width:"100%" }}>
+  {/* <button onClick={onRemix} style={{
+    flex: 1, height: "36px",
+    display: "flex", alignItems: "center", justifyContent: "center",
+    padding: "8px 16px",
+    background: C.background,
+    border: `1px solid ${C.strokeStrong}`,
+    borderRadius: "32px",
+    ...T.tiny, color: C.textStrong,
+    cursor: "pointer",
+    fontFamily: F,
+  }}>Remix</button> */}
+  <button onClick={onView} style={{
+    flex: 1, height: "36px",
+    display: "flex", alignItems: "center", justifyContent: "center",
+    padding: "8px 16px",
+    background: C.textStrong,
+    border: `1px solid ${C.textStrong}`,
+    borderRadius: "32px",
+    ...T.tiny, color: C.background,
+    cursor: "pointer",
+    fontFamily: F,
+  }}>View recipe</button>
+</div>
 
     </div>
   );
