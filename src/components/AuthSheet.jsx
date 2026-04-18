@@ -114,15 +114,15 @@ export default function AuthSheet({ reason = "save", onSuccess, onViewSaved, onC
     if (!code.trim()) return;
     setLoading(true);
     setError("");
-    const { error: err } = await supabase.auth.verifyOtp({
-      email: email.trim(),
-      token: code.trim(),
-      type: "email",
-    });
-    setLoading(false);
-    if (err) { setError(err.message); return; }
-    setStage("success");
-    onSuccess?.();
+    const { data, error: err } = await supabase.auth.verifyOtp({
+  email: email.trim(),
+  token: code.trim(),
+  type: "email",
+});
+setLoading(false);
+if (err) { setError(err.message); return; }
+setStage("success");
+onSuccess?.(data.user);
   }
 
   // ── Render ─────────────────────────────────────────────────────
