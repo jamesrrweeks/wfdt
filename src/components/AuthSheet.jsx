@@ -44,8 +44,8 @@ export default function AuthSheet({ reason = "save", onSuccess, onViewSaved, onC
   const [email, setEmail]   = useState("");
   const [code, setCode]     = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError]   = useState("");
-
+const [error, setError]       = useState("");
+const [verifiedUser, setVerifiedUser] = useState(null);
   const copy = COPY[reason] || COPY.save;
 
   // ── Shared styles ──────────────────────────────────────────────
@@ -121,6 +121,7 @@ export default function AuthSheet({ reason = "save", onSuccess, onViewSaved, onC
 });
 setLoading(false);
 if (err) { setError(err.message); return; }
+setVerifiedUser(data.user);
 setStage("success");
 onSuccess?.(data.user);
   }
@@ -212,8 +213,8 @@ onSuccess?.(data.user);
           </div>
           <div style={actionsBlock}>
             {copy.secondaryCTA && (
-              <button onClick={onViewSaved} style={ctaOutlined}>
-                {copy.secondaryCTA}
+<button onClick={() => onViewSaved(verifiedUser)} style={ctaOutlined}>
+  {copy.secondaryCTA}
               </button>
             )}
             <button onClick={onClose} style={ctaDark}>
