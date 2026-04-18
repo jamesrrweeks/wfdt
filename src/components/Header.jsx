@@ -63,7 +63,7 @@ export default function Header({ showBack = false, onBack, actions = [] }) {
         {actions.map((action, i) => (
           <button
             key={i}
-            onClick={action.onPress}
+            onClick={() => action.onPress()}
             style={{
   width: "48px",
   height: "48px",
