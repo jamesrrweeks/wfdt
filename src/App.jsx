@@ -45,7 +45,8 @@ useEffect(() => {
   supabase.auth.getSession().then(({ data: { session } }) => {
     setUser(session?.user ?? null);
   });
-  const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    console.log("onAuthStateChange fired:", _event, session?.user?.id ?? "no user");
     setUser(session?.user ?? null);
   });
   return () => subscription.unsubscribe();
