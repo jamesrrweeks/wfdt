@@ -51,9 +51,34 @@ useEffect(() => {
   return () => subscription.unsubscribe();
 }, []);
 
-function handleBookmarkPress() {
-  if (user) { setRecipeSaved(prev => !prev); }
-  else { setAuthReason("save"); setShowAuth(true); }
+async function handleBookmarkPress() {
+  if (!user) { setAuthReason("save"); setShowAuth(true); return; }
+  if (recipeSaved) return;
+
+  const ingredientNames = (selectedMeal.ingredients || [])
+    .map(i => i.name).join(" ");
+
+  const searchText = [
+    selectedMeal.name,
+    selectedMeal.description,
+    selectedMeal.cuisine,
+    ingredientNames,
+  ].filter(Boolean).join(" ").toLowerCase();
+
+  const { error } = await supabase.from("recipes").insert({
+    user_id:     user.id,
+    name:        selectedMeal.name,
+    icon:        selectedMeal.icon,
+    cuisine:     selectedMeal.cuisine,
+    time:        selectedMeal.time,
+    calories:    selectedMeal.calories,
+    servings:    prefs?.people ?? null,
+    meal_data:   selectedMeal,
+    search_text: searchText,
+  });
+
+  if (error) { console.error("Save failed:", error); return; }
+  setRecipeSaved(true);
 }
 
 function handleMyRecipesNav() {
@@ -66,8 +91,8 @@ function handleProfileNav() {
   else { setAuthReason("profile"); setShowAuth(true); }
 }
 
-function handleAuthSuccess() {
-  if (authReason === "save") { setRecipeSaved(true); }
+async function handleAuthSuccess() {
+  if (authReason === "save") { setShowAuth(false); await handleBookmarkPress(); }
   if (authReason === "myrecipes") { setShowAuth(false); setScreen("myrecipes"); }
   if (authReason === "profile") { setShowAuth(false); }
 }
