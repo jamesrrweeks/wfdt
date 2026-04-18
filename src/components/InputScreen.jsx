@@ -50,7 +50,7 @@ export default function InputScreen({ onGenerate, isLoading }) {
       </div>
 
       {/* Anything else */}
-      <div style={{ display:"flex", flexDirection:"column", gap:`${SPACE.s}px`, paddingBottom:`${SPACE.xxl + SPACE.xxl}px` }}>
+      <div style={{ display:"flex", flexDirection:"column", gap:`${SPACE.s}px`, paddingBottom:`${SPACE.xxl + SPACE.xxl + SPACE.xxl + SPACE.xxl}px` }}>
   <div style={{ ...T.h3, color:C.textStrong }}>Anything else?</div>
         <AddContext
           onAdd={(note) => { const v=note.trim(); if(v) setFreeNotes(prev=>[...prev,v]); }}
@@ -71,7 +71,7 @@ export default function InputScreen({ onGenerate, isLoading }) {
 {/* Generate — sticky footer */}
 <div style={{
   position:      "fixed",
-  bottom:        `${SPACE.xl + SPACE.s}px`,
+  bottom:        `${SPACE.xxl + SPACE.s}px`,
   left:          "50%",
   transform:     "translateX(-50%)",
   width:         "390px",
