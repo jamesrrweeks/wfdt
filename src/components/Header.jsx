@@ -65,18 +65,18 @@ export default function Header({ showBack = false, onBack, actions = [] }) {
             key={i}
             onClick={action.onPress}
             style={{
-              width: "48px",
-              height: "48px",
-              background: C.background,
-              border: `1px solid ${C.strokeWeak}`,
-              boxShadow: SHADOW.overlay,
-              borderRadius: "32px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              cursor: "pointer",
-              flexShrink: 0,
-            }}
+  width: "48px",
+  height: "48px",
+  background: action.variant === "primary" ? C.primary : C.background,
+  border: action.variant === "primary" ? "none" : `1px solid ${C.strokeWeak}`,
+  boxShadow: SHADOW.overlay,
+  borderRadius: "32px",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  cursor: "pointer",
+  flexShrink: 0,
+}}
           >
             {action.icon}
           </button>
