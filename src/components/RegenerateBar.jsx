@@ -1,4 +1,4 @@
-import { C, F, SHADOW } from "../tokens.js";
+import { C, F, SHADOW, SPACE } from "../tokens.js";
 
 const RefreshIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -13,11 +13,11 @@ export default function RegenerateBar({ visible, loading, onRegenerate }) {
   return (
     <div style={{
       position:      "fixed",
-      bottom:        SPACE.xxl,      
+      bottom:        `${SPACE.xxl}px`,
       left:          "50%",
       transform:     "translateX(-50%)",
       width:         "390px",
-      padding:       "12px 16px 36px",
+      padding:       `${SPACE.xxl + SPACE.m}px ${SPACE.s}px ${SPACE.m}px`,
       background:    "linear-gradient(to top, #F0ECE4 60%, transparent)",
       display:       "flex",
       flexDirection: "column",
