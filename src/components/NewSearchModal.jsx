@@ -1,4 +1,4 @@
-import { C, SPACE, T, F, FD, SHADOW } from "../tokens.js";
+import { C, SPACE, T, F } from "../tokens.js";
 import ModalTemplate from "./ModalTemplate.jsx";
 
 /**
@@ -16,71 +16,6 @@ import ModalTemplate from "./ModalTemplate.jsx";
  *   onViewRecipe   {fn(meal)} — called when user taps a recipe row
  */
 export default function NewSearchModal({ meals, savedMealNames, onConfirm, onClose, onViewRecipe }) {
-  const infoBlock = {
-    display:       "flex",
-    flexDirection: "column",
-    gap:           `${SPACE.s}px`,
-    width:         "100%",
-    flex:          1,
-  };
-
-  const actionsBlock = {
-    display:       "flex",
-    flexDirection: "column",
-    gap:           `${SPACE.xs}px`,
-    width:         "100%",
-  };
-
-  const iconWrap = {
-    width:          "48px",
-    height:         "48px",
-    borderRadius:   "48px",
-    background:     "#FFF0ED",
-    display:        "flex",
-    alignItems:     "center",
-    justifyContent: "center",
-    flexShrink:     0,
-  };
-
-  const recipeList = {
-    display:       "flex",
-    flexDirection: "column",
-    gap:           `${SPACE.xxs}px`,
-    width:         "100%",
-  };
-
-  const recipeRow = (saved) => ({
-    display:        "flex",
-    alignItems:     "center",
-    gap:            `${SPACE.s}px`,
-    padding:        `${SPACE.xs}px ${SPACE.xs}px ${SPACE.xs}px ${SPACE.m}px`,
-    borderRadius:   `${SPACE.xs}px`,
-    cursor:         "pointer",
-    transition:     "background 0.12s",
-    background:     "transparent",
-    border:         "none",
-    width:          "100%",
-    textAlign:      "left",
-  });
-
-  const dot = {
-    width:        "6px",
-    height:       "6px",
-    borderRadius: "50%",
-    background:   C.textStrong,
-    flexShrink:   0,
-  };
-
-  const recipeName = (saved) => ({
-    flex:                  1,
-    ...T.tiny,
-    fontWeight:            "700",
-    color:                 saved ? C.textWeak : C.textStrong,
-    textDecoration:        saved ? "none" : "underline",
-    textUnderlineOffset:   "2px",
-    textDecorationColor:   C.strokeStrong,
-  });
-
   const ctaDark = {
     width:        "100%",
     padding:      `${SPACE.s}px`,
@@ -109,51 +44,67 @@ export default function NewSearchModal({ meals, savedMealNames, onConfirm, onClo
 
   return (
     <ModalTemplate onClose={onClose}>
-      {/* Info block */}
-      <div style={infoBlock}>
+
+      {/* ── Info block (top, flex: 1) ── */}
+      <div style={{ display:"flex", flexDirection:"column", gap:`${SPACE.s}px`, width:"100%", flex:1 }}>
+
+  
+
+        {/* Heading */}
+        <div style={{ ...T.h2, color:C.textStrong }}>
+          Clear your recipes
+        </div>
+
+        {/* Body */}
+        <div style={{ ...T.small, color:C.textWeak }}>
+          Your ingredient selection will be cleared and any unsaved recipes will be deleted.
+        </div>
+
         {/* Icon */}
-        <div style={iconWrap}>
+        <div style={{
+          width:"48px", height:"48px", borderRadius:"48px",
+          background:"#FFF0ED", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0,
+        }}>
           <span
             className="material-symbols-outlined"
-            style={{ fontSize: "24px", color: C.red, fontVariationSettings: "'FILL' 1, 'wght' 500" }}
+            style={{ fontSize:"24px", color:C.red, fontVariationSettings:"'FILL' 1, 'wght' 500" }}
           >
             delete_sweep
           </span>
         </div>
 
-        {/* Heading */}
-        <div style={{ ...T.h2, color: C.textStrong }}>
-          Clear your recipes
-        </div>
-
-        {/* Body */}
-        <div style={{ ...T.small, color: C.textWeak, lineHeight: "20px" }}>
-          Your ingredient selection will be cleared and any unsaved recipes will be deleted.
-        </div>
-
-        {/* Recipe list */}
-        <div style={recipeList}>
+        {/* Recipe rows */}
+        <div style={{ display:"flex", flexDirection:"column", gap:`${SPACE.xxs}px`, width:"100%" }}>
           {(meals || []).map((meal, i) => {
             const saved = savedMealNames?.has(meal.name) ?? false;
             return (
               <button
                 key={meal.id ?? i}
                 onClick={() => onViewRecipe(meal)}
-                style={recipeRow(saved)}
+                style={{
+                  display:"flex", alignItems:"center", gap:`${SPACE.s}px`,
+                  padding:`${SPACE.xs}px ${SPACE.xs}px ${SPACE.xs}px ${SPACE.m}px`,
+                  borderRadius:`${SPACE.xs}px`,
+                  cursor:"pointer", background:"transparent", border:"none",
+                  width:"100%", textAlign:"left",
+                }}
                 onMouseEnter={e => e.currentTarget.style.background = C.strokeWeak}
                 onMouseLeave={e => e.currentTarget.style.background = "transparent"}
               >
-                <div style={dot} />
-                <span style={recipeName(saved)}>{meal.name}</span>
+                <div style={{ width:"6px", height:"6px", borderRadius:"50%", background:C.textStrong, flexShrink:0 }} />
+                <span style={{
+                  flex:1, ...T.tiny, fontWeight:"700",
+                  color:               saved ? C.textWeak : C.textStrong,
+                  textDecoration:      saved ? "none" : "underline",
+                  textUnderlineOffset: "2px",
+                  textDecorationColor: C.strokeStrong,
+                }}>
+                  {meal.name}
+                </span>
                 {saved && (
                   <span
                     className="material-symbols-outlined"
-                    style={{
-                      fontSize:              "18px",
-                      color:                 C.textStrong,
-                      fontVariationSettings: "'FILL' 1, 'wght' 500",
-                      flexShrink:            0,
-                    }}
+                    style={{ fontSize:"18px", color:C.textStrong, fontVariationSettings:"'FILL' 1, 'wght' 500", flexShrink:0 }}
                   >
                     check_circle
                   </span>
@@ -164,15 +115,16 @@ export default function NewSearchModal({ meals, savedMealNames, onConfirm, onClo
         </div>
       </div>
 
-      {/* Actions block */}
-      <div style={actionsBlock}>
+      {/* ── Actions block (bottom) ── */}
+      <div style={{ display:"flex", flexDirection:"column", gap:`${SPACE.xs}px`, width:"100%" }}>
         <button style={ctaDark} onClick={onConfirm}>
-          Continue — clear recipes
+          Continue and clear recipes
         </button>
         <button style={ctaOutlined} onClick={onClose}>
           Cancel
         </button>
       </div>
+
     </ModalTemplate>
   );
 }
