@@ -13,6 +13,7 @@ import PageTemplate  from "./components/PageTemplate.jsx";
 import { BookmarkIcon } from "./icons.jsx";
 import LoadingScreen  from "./components/LoadingScreen.jsx";
 import MyRecipesScreen from "./components/MyRecipesScreen.jsx";
+import Toast from "./components/Toast.jsx";
 
 const link = document.createElement("link");
 link.rel = "stylesheet";
@@ -40,24 +41,61 @@ export default function App() {
   const [user, setUser]             = useState(null);
 const [showAuth, setShowAuth]     = useState(false);
 const [authReason, setAuthReason] = useState("save");
+  const [savedMealNames, setSavedMealNames] = useState(new Set());
+  const [toast, setToast] = useState(null);
 
 useEffect(() => {
   supabase.auth.getSession().then(({ data: { session } }) => {
     setUser(session?.user ?? null);
   });
 const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-    console.log("onAuthStateChange fired:", _event, session?.user?.id ?? "no user");
     setUser(session?.user ?? null);
   });
   return () => subscription.unsubscribe();
 }, []);
+
+  function showToast(type) {
+  setToast({ type });
+}
+
+async function handleUndoToast() {
+  const wasRemoved = toast?.type === "removed";
+  setToast(null);
+  if (wasRemoved) {
+    setRecipeSaved(true);
+    await supabase.from("recipes").insert({
+      user_id:   user.id,
+      name:      selectedMeal.name,
+      icon:      selectedMeal.icon,
+      cuisine:   selectedMeal.cuisine,
+      time:      selectedMeal.time,
+      calories:  selectedMeal.calories,
+      servings:  prefs?.people ?? null,
+      meal_data: selectedMeal,
+    });
+  } else {
+    setRecipeSaved(false);
+    await supabase.from("recipes").delete().match({ user_id: user.id, name: selectedMeal.name });
+  }
+}
+
+  async function checkSavedMeals(newMeals, activeUser) {
+  if (!activeUser?.id || !newMeals?.length) return;
+  const names = newMeals.map(m => m.name);
+  const { data, error } = await supabase
+    .from("recipes")
+    .select("name")
+    .eq("user_id", activeUser.id)
+    .in("name", names);
+  if (error || !data) return;
+  setSavedMealNames(new Set(data.map(r => r.name)));
+}
 
 async function handleBookmarkPress(freshUser) {
   const activeUser = freshUser || user;
   if (!activeUser?.id) { setAuthReason("save"); setShowAuth(true); return; }
 
   const { data: sessionData } = await supabase.auth.getSession();
-  console.log("session at insert time:", sessionData?.session);
   if (!sessionData?.session) {
     setUser(null);
     setAuthReason("save");
@@ -87,8 +125,10 @@ async function handleBookmarkPress(freshUser) {
     search_text: searchText,
   });
 
-  if (error) { console.error("Save failed — full error:", JSON.stringify(error, null, 2)); return; }
+if (error) { console.error("Save failed — full error:", JSON.stringify(error, null, 2)); return; }
   setRecipeSaved(true);
+  showToast("saved");
+  setSavedMealNames(prev => new Set([...prev, selectedMeal.name]));
 }
 
 function handleMyRecipesNav() {
@@ -113,6 +153,26 @@ async function handleViewSaved(freshUser) {
   setScreen("myrecipes");
 }
 
+  function handleNewSearch() {
+  setMeals(null);
+  setPrefs(null);
+  setSelectedMeal(null);
+  setRecipeSaved(false);
+  setSavedMealNames(new Set());
+  setScreen("input");
+}
+
+function handleViewRecipeFromModal(meal) {
+  if (meal) {
+    setSelectedMeal(meal);
+    setRecipeSaved(savedMealNames.has(meal.name));
+    setPreviousScreen("results");
+    setScreen("recipe");
+  } else {
+    setScreen("results");
+  }
+}
+
   const handleGenerate = async (p) => {
     setPrefs(p);
     setApiError(null);
@@ -133,7 +193,9 @@ async function handleViewSaved(freshUser) {
       const d = await r.json();
       const t = d.content[0].text;
       const c = t.replace(/```json|```/g, "").trim();
-      setMeals(JSON.parse(c).map((m, i) => ({ ...m, id: i + 1 })));
+      const newMeals = JSON.parse(c).map((m, i) => ({ ...m, id: i + 1 }));
+      setMeals(newMeals);
+      await checkSavedMeals(newMeals, user);
     } catch {
       setApiError("Couldn't connect — showing example meals.");
       setMeals(MOCK_MEALS);
@@ -178,8 +240,16 @@ return (
         {isLoading && <LoadingScreen />}
         {!isLoading && screen === "input" && (
   <PageTemplate title="What's for dinner tonight?">
-    <InputScreen onGenerate={handleGenerate} isLoading={isLoading} onShowDS={() => setScreen("ds")} />
-  </PageTemplate>
+<InputScreen
+      onGenerate={handleGenerate}
+      isLoading={isLoading}
+      onShowDS={() => setScreen("ds")}
+      hasResults={!!meals && meals.length > 0}
+      meals={meals}
+      savedMealNames={savedMealNames}
+      onNewSearch={handleNewSearch}
+      onViewRecipe={handleViewRecipeFromModal}
+    />  </PageTemplate>
 )}
 
         {screen === "ds" && (
@@ -250,6 +320,12 @@ onSelect={m => { setSelectedMeal(m); setRecipeSaved(false); setPreviousScreen("m
     />
   </PageTemplate>
 )}
+
+        <Toast
+          toast={toast}
+          onUndo={handleUndoToast}
+          onHide={() => setToast(null)}
+        />
 
         {showNav && (
           <BottomNav
