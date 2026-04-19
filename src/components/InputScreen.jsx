@@ -84,7 +84,7 @@ export default function InputScreen({ onGenerate, isLoading, hasResults, meals, 
 {/* Generate — sticky footer */}
 <div style={{
   position:      "fixed",
-  bottom:        `${SPACE.xxl + SPACE.s}px`,
+  bottom:        `${SPACE.xxl}px`,
   left:          "50%",
   transform:     "translateX(-50%)",
   width:         "390px",
