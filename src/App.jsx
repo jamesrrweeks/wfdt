@@ -14,6 +14,7 @@ import { BookmarkIcon } from "./icons.jsx";
 import LoadingScreen  from "./components/LoadingScreen.jsx";
 import MyRecipesScreen from "./components/MyRecipesScreen.jsx";
 import Toast from "./components/Toast.jsx";
+import AddRecipeModal from "./components/AddRecipeModal.jsx";
 
 const link = document.createElement("link");
 link.rel = "stylesheet";
@@ -43,6 +44,7 @@ const [showAuth, setShowAuth]     = useState(false);
 const [authReason, setAuthReason] = useState("save");
   const [savedMealNames, setSavedMealNames] = useState(new Set());
   const [toast, setToast] = useState(null);
+  const [showAdd, setShowAdd] = useState(false);
 
 useEffect(() => {
   supabase.auth.getSession().then(({ data: { session } }) => {
@@ -308,7 +310,7 @@ onBack={() => setScreen(previousScreen)}
       },
       {
         icon: <span className="material-symbols-outlined" style={{ fontSize:"24px", fontVariationSettings:"'FILL' 1, 'wght' 500", color: C.textStrong }}>add</span>,
-        onPress: () => {},
+        onPress: () => setShowAdd(true),
         variant: "primary",
       },
     ]}
@@ -321,6 +323,7 @@ onSelect={m => { setSelectedMeal(m); setRecipeSaved(false); setPreviousScreen("m
   </PageTemplate>
 )}
 
+        {showAdd && <AddRecipeModal onClose={() => setShowAdd(false)} />}
         <Toast
           toast={toast}
           onUndo={handleUndoToast}
