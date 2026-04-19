@@ -9,6 +9,8 @@ export default function AddRecipeModal({ onClose, onSaved, user }) {
   const [url, setUrl] = useState("");
   const [view, setView] = useState("launcher");
   const [progressWidth, setProgressWidth] = useState(0);
+  const [imageFile, setImageFile]         = useState(null);
+  const [imagePreview, setImagePreview]   = useState(null);
 
   // ── Shared progress bar helper ──────────────────────────────────
   function startProgress() {
@@ -102,6 +104,50 @@ export default function AddRecipeModal({ onClose, onSaved, user }) {
     }
   }
 
+  // ── IMAGE submit ────────────────────────────────────────────────
+  async function handleImageSubmit() {
+    if (!imageFile) return;
+    setView("thinking");
+    const interval = startProgress();
+    try {
+      const base64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload  = () => resolve(reader.result.split(",")[1]);
+        reader.onerror = () => reject(new Error("File read failed"));
+        reader.readAsDataURL(imageFile);
+      });
+      const response = await fetch("/api/parse-image", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-secret-token": import.meta.env.VITE_API_SECRET_TOKEN,
+        },
+        body: JSON.stringify({ imageBase64: base64, mediaType: imageFile.type }),
+      });
+      const data = await response.json();
+      const raw = data.content[0].text.trim();
+      clearInterval(interval);
+      setProgressWidth(100);
+      if (raw === "ERROR") { setTimeout(() => setView("error"), 300); return; }
+      const recipe = JSON.parse(raw.replace(/```json|```/g, "").trim());
+      const ok = await saveRecipe(recipe, interval);
+      if (ok) setTimeout(() => { setView("saved"); if (onSaved) onSaved(recipe); }, 300);
+    } catch {
+      clearInterval(interval);
+      setView("error");
+    }
+  }
+
+  // ── File picker handler ─────────────────────────────────────────
+  function handleFileChange(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    setImageFile(file);
+    const reader = new FileReader();
+    reader.onload = (ev) => setImagePreview(ev.target.result);
+    reader.readAsDataURL(file);
+  }
+
   // ── LAUNCHER view ───────────────────────────────────────────────
   if (view === "launcher") {
     return (
@@ -137,10 +183,24 @@ export default function AddRecipeModal({ onClose, onSaved, user }) {
               <div style={{ ...T.tiny, color: C.textWeak }}>Paste a URL to add a recipe to your collection</div>
             </div>
           </button>
+        {/* Image row */}
+          <button
+            onClick={() => setView("image")}
+            style={{ display: "flex", alignItems: "center", gap: "10px", background: "none", border: "none", cursor: "pointer", padding: 0, textAlign: "left", width: "100%" }}
+          >
+            <div style={{ width: 48, height: 48, borderRadius: 80, background: C.strokeWeak, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <span className="material-symbols-outlined" style={{ fontSize: 24, color: C.textStrong, fontVariationSettings: "'FILL' 0, 'wght' 400" }}>add_photo_alternate</span>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: `${SPACE.xxs}px` }}>
+              <div style={{ ...T.h3, color: C.textStrong }}>Image</div>
+              <div style={{ ...T.tiny, color: C.textWeak }}>Upload a photo or screenshot of a recipe</div>
+            </div>
+          </button>
         </div>
       </ModalTemplate>
     );
   }
+
 
   // ── PASTE view ──────────────────────────────────────────────────
   if (view === "paste") {
@@ -267,6 +327,59 @@ export default function AddRecipeModal({ onClose, onSaved, user }) {
     );
   }
 
+  // ── IMAGE view ──────────────────────────────────────────────────
+  if (view === "image") {
+    return (
+      <ModalTemplate onClose={onClose}>
+        <div style={{ display: "flex", flexDirection: "column", gap: `${SPACE.xs}px`, width: "100%" }}>
+          <div style={{ ...T.h1, color: C.textStrong }}>Image</div>
+          <div style={{ ...T.tiny, color: C.textWeak }}>Upload a photo or screenshot of a recipe to add to your collection</div>
+        </div>
+        <label style={{
+          display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+          gap: `${SPACE.s}px`, width: "100%", minHeight: "140px",
+          border: `2px dashed ${imageFile ? C.primary : C.strokeStrong}`,
+          borderRadius: `${SPACE.s}px`,
+          background: imageFile ? "rgba(205,234,69,0.06)" : C.background,
+          cursor: "pointer", boxSizing: "border-box", padding: `${SPACE.m}px`,
+          transition: "border-color 0.2s, background 0.2s", overflow: "hidden",
+        }}>
+          <input type="file" accept="image/*" onChange={handleFileChange} style={{ display: "none" }} />
+          {imagePreview ? (
+            <>
+              <img src={imagePreview} alt="Recipe preview" style={{ width: "100%", maxHeight: "120px", objectFit: "cover", borderRadius: "8px" }} />
+              <div style={{ ...T.tiny, color: C.textWeak, textAlign: "center", wordBreak: "break-all" }}>{imageFile.name}</div>
+            </>
+          ) : (
+            <>
+              <div style={{ width: 48, height: 48, borderRadius: "50%", background: C.strokeWeak, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <span className="material-symbols-outlined" style={{ fontSize: 24, color: C.textWeak, fontVariationSettings: "'FILL' 0, 'wght' 400" }}>add_photo_alternate</span>
+              </div>
+              <div style={{ ...T.small, color: C.textStrong, fontWeight: 700, textAlign: "center" }}>Tap to choose a photo</div>
+              <div style={{ ...T.tiny, color: C.textWeak, textAlign: "center" }}>Opens your photo library or camera</div>
+            </>
+          )}
+        </label>
+        <button
+          onClick={handleImageSubmit}
+          disabled={!imageFile}
+          style={{
+            width: "100%", height: "48px",
+            background: imageFile ? C.primary : C.strokeWeak,
+            borderRadius: "32px", border: "none",
+            fontFamily: "'Atkinson Hyperlegible', sans-serif",
+            fontSize: "16px", fontWeight: 700,
+            color: imageFile ? C.textStrong : C.textWeak,
+            cursor: imageFile ? "pointer" : "not-allowed",
+            transition: "background 0.2s, color 0.2s",
+          }}
+        >
+          Add recipe
+        </button>
+      </ModalTemplate>
+    );
+  }
+
   // ── THINKING view ───────────────────────────────────────────────
   if (view === "thinking") {
     return (
@@ -280,23 +393,23 @@ export default function AddRecipeModal({ onClose, onSaved, user }) {
           <div style={{ width: "100%", height: "5px", background: C.strokeWeak, borderRadius: "8px", overflow: "hidden" }}>
             <div style={{ height: "5px", width: `${progressWidth}%`, background: C.primary, borderRadius: "8px", transition: "width 0.3s ease" }} />
           </div>
-          {/* Greyed field showing what was entered */}
-          <div style={{
-            width: "100%",
-            background: C.background,
-            border: `1px solid ${C.strokeStrong}`,
-            borderRadius: `${SPACE.s}px`,
-            padding: `${SPACE.s}px ${SPACE.m}px`,
-            boxSizing: "border-box",
-            fontFamily: "'Atkinson Hyperlegible', sans-serif",
-            fontSize: "16px",
-            lineHeight: "24px",
-            color: C.strokeStrong,
-            minHeight: "56px",
-            wordBreak: "break-all",
-          }}>
-            {text || url}
-          </div>
+          {/* Show image thumbnail if from image flow, otherwise text/url */}
+          {imagePreview ? (
+            <img src={imagePreview} alt="Recipe being processed" style={{ width: "100%", maxHeight: "120px", objectFit: "cover", borderRadius: "8px", opacity: 0.6 }} />
+          ) : (
+            <div style={{
+              width: "100%", background: C.background,
+              border: `1px solid ${C.strokeStrong}`,
+              borderRadius: `${SPACE.s}px`,
+              padding: `${SPACE.s}px ${SPACE.m}px`,
+              boxSizing: "border-box",
+              fontFamily: "'Atkinson Hyperlegible', sans-serif",
+              fontSize: "16px", lineHeight: "24px",
+              color: C.strokeStrong, minHeight: "56px", wordBreak: "break-all",
+            }}>
+              {text || url}
+            </div>
+          )}
         </div>
       </ModalTemplate>
     );
