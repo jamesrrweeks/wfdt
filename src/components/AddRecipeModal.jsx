@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { C, SPACE, T } from "../tokens.js";
 import ModalTemplate from "./ModalTemplate.jsx";
+import { supabase } from "../supabase.js";
 
 // view: "paste" | "thinking" | "saved" | "error"
-export default function AddRecipeModal({ onClose, onSaved }) {
+export default function AddRecipeModal({ onClose, onSaved, user }) {
   const [text, setText] = useState("");
   const [view, setView] = useState("paste");
   const [progressWidth, setProgressWidth] = useState(0);
@@ -41,6 +42,21 @@ export default function AddRecipeModal({ onClose, onSaved }) {
 
       const clean = raw.replace(/```json|```/g, "").trim();
       const recipe = JSON.parse(clean);
+
+      const { error: insertError } = await supabase.from("recipes").insert({
+        user_id:   user.id,
+        name:      recipe.name,
+        icon:      recipe.icon ?? "Vegetarian",
+        cuisine:   recipe.cuisine,
+        time:      recipe.time,
+        calories:  recipe.calories,
+        servings:  recipe.servings,
+        meal_data: recipe,
+        search_text: [recipe.name, recipe.description, recipe.cuisine].filter(Boolean).join(" ").toLowerCase(),
+      });
+
+      if (insertError) { clearInterval(interval); setView("error"); return; }
+
       setTimeout(() => {
         setView("saved");
         if (onSaved) onSaved(recipe);
@@ -169,7 +185,7 @@ export default function AddRecipeModal({ onClose, onSaved }) {
           </div>
         </div>
         <button
-          onClick={onClose}
+          onClick={() => onSaved && onSaved()}
           style={{
             width: "100%", height: "48px",
             background: C.textStrong,
