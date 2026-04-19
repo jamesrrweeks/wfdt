@@ -317,7 +317,7 @@ onBack={() => setScreen(previousScreen)}
   >
     <MyRecipesScreen
   user={user}
-onSelect={m => { setSelectedMeal(m); setRecipeSaved(false); setPreviousScreen("myrecipes"); setScreen("recipe"); }}
+onSelect={m => { setSelectedMeal(m); setRecipeSaved(true); setPreviousScreen("myrecipes"); setScreen("recipe"); }}
       onRemix={m => { setSelectedMeal(m); }}
     />
   </PageTemplate>
