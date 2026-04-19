@@ -1,77 +1,47 @@
-export const config = { runtime: "edge" };
+export default async function handler(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-secret-token');
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).end();
 
-const PARSE_PROMPT = `You are a recipe parser. The user has uploaded a photo or screenshot of a recipe.
-
-Extract the recipe and return ONLY a valid JSON object — no markdown, no backticks, no explanation.
-
-The JSON must have exactly these fields:
-{
-  "name": string,
-  "description": string (1 sentence),
-  "icon": string (must be exactly one of: "Chicken", "Beef & Lamb", "Seafood", "Vegetarian", "Rice & Grains", "Pasta & Noodles", "Bread & Wraps", "Potato & Root"),
-  "cuisine": string,
-  "time": string (e.g. "30 mins"),
-  "calories": number (per serving),
-  "servings": number,
-  "ingredients": array of objects with { "name": string, "amount": string, "source": "user", "suggestions": [] },
-  "macros": { "protein": number, "carbs": number, "fat": number } (percentages adding to 100),
-  "method": array of step strings
-}
-
-If you cannot find a recognisable recipe in the image, return only the word ERROR with no other text.`;
-
-export default async function handler(req) {
-  if (req.method !== "POST") {
-    return new Response("Method not allowed", { status: 405 });
+  const token = req.headers['x-secret-token'];
+  if (token !== process.env.API_SECRET_TOKEN) {
+    return res.status(401).json({ error: 'Unauthorised' });
   }
 
-  const secret = req.headers.get("x-secret-token");
-  if (secret !== process.env.VITE_API_SECRET_TOKEN) {
-    return new Response("Unauthorised", { status: 401 });
-  }
+  const { imageBase64, mediaType } = req.body;
+  if (!imageBase64) return res.status(400).json({ error: 'No image provided' });
 
-  let imageBase64, mediaType;
   try {
-    const body = await req.json();
-    imageBase64 = body.imageBase64;
-    mediaType   = body.mediaType || "image/jpeg";
-  } catch {
-    return new Response("Bad request", { status: 400 });
-  }
-
-  if (!imageBase64) {
-    return new Response("Missing imageBase64", { status: 400 });
-  }
-
-  const anthropicRes = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "Content-Type":      "application/json",
-      "x-api-key":         process.env.ANTHROPIC_API_KEY,
-      "anthropic-version": "2023-06-01",
-    },
-    body: JSON.stringify({
-      model:      "claude-sonnet-4-5",
-      max_tokens: 2000,
-      messages: [
-        {
-          role: "user",
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1500,
+        messages: [{
+          role: 'user',
           content: [
             {
-              type:   "image",
-              source: { type: "base64", media_type: mediaType, data: imageBase64 },
+              type: 'image',
+              source: { type: 'base64', media_type: mediaType || 'image/jpeg', data: imageBase64 },
             },
-            { type: "text", text: PARSE_PROMPT },
+            {
+              type: 'text',
+              text: `You are a recipe parser. Extract the recipe from this image and return ONLY a valid JSON object with no markdown, no backticks, and no explanation. If you cannot find a recognisable recipe, return only the word ERROR.\n\nThe JSON must have exactly these fields:\n- name (string)\n- description (1 sentence string)\n- icon (string — must be exactly one of: "Chicken", "Beef & Lamb", "Seafood", "Vegetarian", "Rice & Grains", "Pasta & Noodles", "Bread & Wraps", "Potato & Root")\n- cuisine (string)\n- time (string, e.g. "30 mins")\n- calories (number, per serving — estimate if not stated)\n- servings (number)\n- ingredients (array of objects: { "name": string, "amount": string, "source": "ai", "suggestions": [] })\n- macros (object: { "protein": number, "carbs": number, "fat": number } — percentages adding to 100)\n- method (array of step strings)`,
+            },
           ],
-        },
-      ],
-    }),
-  });
-
-  const data = await anthropicRes.json();
-  console.log("parse-image response:", JSON.stringify(data));
-  return new Response(JSON.stringify(data), {
-    status: 200,
-    headers: { "Content-Type": "application/json" },
-  });
+        }],
+      }),
+    });
+    const data = await response.json();
+    res.status(response.status).json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 }
