@@ -108,18 +108,18 @@ export default function InputScreen({ onGenerate, isLoading, hasResults, meals, 
             <button
               onClick={() => onViewRecipe(null)}
               style={{
-                width:"100%", height:"65px", borderRadius:"32px", border:"none",
+                width:"100%", height:`${SPACE.xl}px`, borderRadius:"32px", border:"none",
                 background:C.primary, color:C.textStrong,
-                fontFamily:F, fontSize:"20px", fontWeight:"700",
+                fontFamily:F, fontSize:"16px", fontWeight:"700",
                 cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:"8px",
               }}
             >
-              Your latest recipes
+              Recent recipes
             </button>
             <button
               onClick={() => setShowModal(true)}
               style={{
-                width:"100%", height:"52px", borderRadius:"32px",
+                width:"100%", height:`${SPACE.xl}px`, borderRadius:"32px",
                 border:`1.5px solid ${C.strokeStrong}`, background:"transparent",
                 color:C.textStrong, fontFamily:F, fontSize:"16px", fontWeight:"700",
                 cursor:"pointer",
