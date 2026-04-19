@@ -69,6 +69,7 @@ export default async function handler(req) {
   });
 
   const data = await anthropicRes.json();
+  console.log("parse-image response:", JSON.stringify(data));
   return new Response(JSON.stringify(data), {
     status: 200,
     headers: { "Content-Type": "application/json" },
