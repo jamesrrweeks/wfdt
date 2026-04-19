@@ -23,8 +23,7 @@ export default async function handler(req, res) {
         max_tokens: 1000,
         messages: [{
           role: 'user',
-          content: `You are a recipe parser. The user has pasted text that may contain a recipe. Extract it and return ONLY a valid JSON object with these fields: name, description, cuisine, time, calories, servings, ingredients (array of {name, amount, unit}), steps (array of strings). If you cannot parse a valid recipe, return ONLY the word ERROR and nothing else.\n\nText:\n${req.body.text}`,
-        }],
+content: `You are a recipe parser. The user has pasted text that may contain a recipe. Extract it and return ONLY a valid JSON object with these exact fields: name (string), description (string, one sentence), cuisine (string, e.g. "Italian"), time (string, e.g. "30 mins"), calories (number), servings (number), icon (one of exactly: "Chicken", "Beef & Lamb", "Seafood", "Vegetarian", "Rice & Grains", "Pasta & Noodles", "Bread & Wraps", "Potato & Root" — pick the best match), ingredients (array of {name, amount, unit}), method (array of step strings). If you cannot parse a valid recipe from the text, return ONLY the word ERROR and nothing else.\n\nText:\n${req.body.text}`,        }],
       }),
     });
     const data = await response.json();
