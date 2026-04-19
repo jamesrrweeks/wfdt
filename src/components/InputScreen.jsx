@@ -108,8 +108,8 @@ export default function InputScreen({ onGenerate, isLoading, hasResults, meals, 
             <button
               onClick={() => onViewRecipe(null)}
               style={{
-                width:"100%", height:`${SPACE.xl}px`, borderRadius:"32px", border:"none",
-                background:C.primary, color:C.textStrong,
+                width:"100%", height:`${SPACE.xl}px`, borderRadius:"32px",
+                background: C.strokeWeak, color:C.textStrong, border:`1.5px solid ${C.strokeStrong}`,
                 fontFamily:F, fontSize:"16px", fontWeight:"700",
                 cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:"8px",
               }}
@@ -120,7 +120,7 @@ export default function InputScreen({ onGenerate, isLoading, hasResults, meals, 
               onClick={() => setShowModal(true)}
               style={{
                 width:"100%", height:`${SPACE.xl}px`, borderRadius:"32px",
-                border:`1.5px solid ${C.strokeStrong}`, background:"transparent",
+                border:`1.5px solid ${C.strokeStrong}`, background:C.primary,
                 color:C.textStrong, fontFamily:F, fontSize:"16px", fontWeight:"700",
                 cursor:"pointer",
               }}
