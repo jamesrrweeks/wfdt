@@ -15,6 +15,12 @@ import { C, SPACE, SHADOW } from "../tokens.js";
 export default function ModalTemplate({ onClose, children }) {
   return (
     <>
+      <style>{`
+        @keyframes slideUp {
+          from { transform: translateX(-50%) translateY(100%); }
+          to   { transform: translateX(-50%) translateY(0); }
+        }
+      `}</style>
       {/* Backdrop */}
       <div
         onClick={onClose}
@@ -34,6 +40,7 @@ export default function ModalTemplate({ onClose, children }) {
           bottom: 0,
           left: "50%",
           transform: "translateX(-50%)",
+          animation: "slideUp 0.32s cubic-bezier(0.32, 0.72, 0, 1)",
           width: "min(100%, 480px)",
           minWidth: "320px",
           height: "75vh",
