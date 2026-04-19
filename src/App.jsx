@@ -323,7 +323,23 @@ onSelect={m => { setSelectedMeal(m); setRecipeSaved(false); setPreviousScreen("m
   </PageTemplate>
 )}
 
-        {showAdd && <AddRecipeModal onClose={() => setShowAdd(false)} />}
+{showAdd && (
+  <AddRecipeModal
+    onClose={() => setShowAdd(false)}
+    onSaved={(recipe) => {
+      setShowAdd(false);
+      if (recipe) {
+        setSelectedMeal(recipe);
+        setPreviousScreen("myrecipes");
+        setScreen("recipe");
+      } else {
+        setScreen("myrecipes");
+      }
+    }}
+    user={user}
+  />
+)}
+        
         <Toast
           toast={toast}
           onUndo={handleUndoToast}
