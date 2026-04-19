@@ -5,14 +5,27 @@ import CategoryChipSelector from "./CategoryChipSelector.jsx";
 import VegSelector from "./VegSelector.jsx";
 import Stepper from "./Stepper.jsx";
 import AddContext from "./AddContext.jsx";
+import NewSearchModal from "./NewSearchModal.jsx";
 
-export default function InputScreen({ onGenerate, isLoading }) {
+export default function InputScreen({ onGenerate, isLoading, hasResults, meals, savedMealNames, onNewSearch, onViewRecipe }) {
   const [season, setSeason]       = useState(CURRENT_SEASON);
   const [proteins, setProteins]   = useState(["Any"]);
   const [carbs, setCarbs]         = useState(["Any"]);
   const [veg, setVeg]             = useState(["Any"]);
   const [people, setPeople]       = useState(2);
   const [freeNotes, setFreeNotes] = useState([]);
+
+  const [showModal, setShowModal] = useState(false);
+
+  function handleConfirmNewSearch() {
+    setShowModal(false);
+    onNewSearch();
+  }
+
+  function handleViewRecipe(meal) {
+    setShowModal(false);
+    onViewRecipe(meal);
+  }
 
   const handleSeasonChange = (s) => { setSeason(s); setVeg(["Any"]); };
   const removeFreeNote = (i) => setFreeNotes(prev => prev.filter((_,idx) => idx !== i));
@@ -90,24 +103,60 @@ export default function InputScreen({ onGenerate, isLoading }) {
             ))}
           </div>
         )}
-        <button
-          onClick={() => onGenerate({ season, proteins, carbs, veg, people, freeText: freeNotes.join(". ") })}
-          disabled={isLoading}
-          style={{
-            width:"100%", height:"65px",
-            borderRadius:"32px", border:"none",
-            background: isLoading ? C.strokeStrong : C.primary,
-            color:C.textStrong, fontFamily:F, fontSize:"20px", fontWeight:"700",
-            cursor: isLoading ? "not-allowed" : "pointer",
-            display:"flex", alignItems:"center", justifyContent:"center", gap:"8px",
-          }}
-        >
-          {isLoading
-            ? <><span style={{ animation:"spin 1s linear infinite", display:"inline-block" }}>✦</span> Finding ideas...</>
-            : "Generate meal"
-          }
-        </button>
+        {hasResults ? (
+          <div style={{ display:"flex", flexDirection:"column", gap:`${SPACE.xs}px` }}>
+            <button
+              onClick={() => onViewRecipe(null)}
+              style={{
+                width:"100%", height:"65px", borderRadius:"32px", border:"none",
+                background:C.primary, color:C.textStrong,
+                fontFamily:F, fontSize:"20px", fontWeight:"700",
+                cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:"8px",
+              }}
+            >
+              Your latest recipes
+            </button>
+            <button
+              onClick={() => setShowModal(true)}
+              style={{
+                width:"100%", height:"52px", borderRadius:"32px",
+                border:`1.5px solid ${C.strokeStrong}`, background:"transparent",
+                color:C.textStrong, fontFamily:F, fontSize:"16px", fontWeight:"700",
+                cursor:"pointer",
+              }}
+            >
+              New search
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => onGenerate({ season, proteins, carbs, veg, people, freeText: freeNotes.join(". ") })}
+            disabled={isLoading}
+            style={{
+              width:"100%", height:"65px", borderRadius:"32px", border:"none",
+              background: isLoading ? C.strokeStrong : C.primary,
+              color:C.textStrong, fontFamily:F, fontSize:"20px", fontWeight:"700",
+              cursor: isLoading ? "not-allowed" : "pointer",
+              display:"flex", alignItems:"center", justifyContent:"center", gap:"8px",
+            }}
+          >
+            {isLoading
+              ? <><span style={{ animation:"spin 1s linear infinite", display:"inline-block" }}>✦</span> Finding ideas...</>
+              : "Generate meal"
+            }
+          </button>
+        )}
       </div>
+
+      {showModal && (
+        <NewSearchModal
+          meals={meals}
+          savedMealNames={savedMealNames}
+          onConfirm={handleConfirmNewSearch}
+          onClose={() => setShowModal(false)}
+          onViewRecipe={handleViewRecipe}
+        />
+      )}
     </>
   );
 }
