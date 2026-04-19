@@ -59,8 +59,9 @@ export default function Toast({ toast, onUndo, onHide }) {
           justifyContent: "space-between",
           padding: `10px ${SPACE.s}px`,
           transition: visible
-            ? "bottom 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)"
-            : "bottom 0.3s cubic-bezier(0.4, 0, 1, 1)",
+            ? "bottom 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease"
+            : "bottom 0.3s cubic-bezier(0.4, 0, 1, 1), opacity 0.2s ease",
+        opacity: visible ? 1 : 0,
           position: "relative",
           bottom: visible ? 109 : 0,
         }}
